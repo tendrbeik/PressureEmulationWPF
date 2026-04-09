@@ -19,7 +19,7 @@ namespace PressureEmulationWPF
         public MainWindow()
         {
             InitializeComponent();
-            //Изменение для коммита
+            DataContext = new MainViewModel();
         }
     }
 }
