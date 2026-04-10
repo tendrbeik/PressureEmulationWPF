@@ -1,14 +1,11 @@
 ﻿using LiveChartsCore;
 using LiveChartsCore.Defaults;
-using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Drawing;
-using System.Windows;
 using System.Windows.Input;
+using LiteDB;
 
 namespace PressureEmulationWPF
 {
@@ -19,6 +16,7 @@ namespace PressureEmulationWPF
         #region Private-свойства класса
         //TODO: Надо узнать зачем тут вообще Readonly, если мы и так задали
         //модификатор доступа private. Возможно придётся убрать этот модификтор.
+        //описание свойств использующихся во вкладке TabItem EmulationTab
         private readonly Random _random = new();
         private readonly List<ObservablePoint> _values = [];
         private double _higherPressureLimit = 150;
@@ -29,9 +27,14 @@ namespace PressureEmulationWPF
         private bool _randomPressureMode = true;
         private bool _constantPressureMode = false;
         private bool _constantChangingPressureMode = false;
+
+        //Описание полей для вкладки TabItem SaveLastEmulationTab
+        private string _emulationName = "Эмуляция";
+        private DateTime _emulationDate = DateTime.Now;
         #endregion
 
         #region Геттеры и сеттеры
+        //описание геттеров и сеттеров использующихся во вкладке TabItem EmulationTab
         public double HigherPressureLimit
         {
             get { return _higherPressureLimit; }
@@ -97,6 +100,22 @@ namespace PressureEmulationWPF
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
 
+        //Описание геттеров и сеттеров для вкладки TabItem SaveLastEmulationTab
+        public string EmulationName
+        {
+            get => _emulationName;
+            set {
+                if (value.Length == 0) return;
+                _emulationName = value;
+            }
+        }
+        public DateTime EmulationDate
+        {
+            get => _emulationDate;
+            set => _emulationDate = value;
+        }
+        public ICommand SaveEmulationCommand { get; }
+
         #endregion
 
 
@@ -148,6 +167,11 @@ namespace PressureEmulationWPF
             StopCommand = new MyCommand(_ =>
             {
                 IsReading = false;
+            });
+
+            SaveEmulationCommand = new MyCommand(_ =>
+            {
+                SaveEmulation();
             });
         }
 
@@ -222,6 +246,7 @@ namespace PressureEmulationWPF
             {
                 _values.Add(new ObservablePoint(emulationTime, startPressureValue));
                 emulationTime += delay / 1000d;
+                XAxes[0].CustomSeparators = GetSeparators(emulationTime, lastSecondsAmount, delay);
                 await Task.Delay(delay);
             }
 
@@ -248,7 +273,34 @@ namespace PressureEmulationWPF
         }
         #endregion
 
+        #region Методы для работы с LiteDB
+        private void SaveEmulation()
+        {
+            if (IsReading)
+                //TODO: Прописать сообщение об ошибке в будущем ERRORMESSAGE
+                return;
+            using (var db = new LiteDatabase(@"Data.db"))
+            {
+                var col = db.GetCollection<EmualtionData>("Emulations");
 
+                var emulation = new EmualtionData
+                {
+                    Name = _emulationName,
+                    Date = _emulationDate,
+                    Values = _values
+                };
+
+                col.EnsureIndex(x => x.Name);
+                if (col.Find(x => x.Name.Equals(_emulationName)).Any())
+                    //TODO: Прописать сообщение об ошибке в будущем ERRORMESSAGE
+                    return;
+
+                col.Insert(emulation);
+
+                EmualtionData result = col.Find(x => x.Name.Equals(_emulationName)).First();
+            }
+        }
+        #endregion
         private double[] GetSeparators(double emulationTime, double lastSecondsAmount, int delay)
         {
             int sepsAmount = (int)(lastSecondsAmount * 1000d / (double)delay);

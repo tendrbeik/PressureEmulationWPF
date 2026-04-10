@@ -124,13 +124,13 @@
                         Margin="10,58,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="205"
-                        Command="{Binding StartCommand}" FontSize="10"/>
+                        Command="{Binding SaveEmulationCommand}" FontSize="10"/>
                     <TextBox 
                         x:Name="EmulationName" 
                         HorizontalAlignment="Left" 
                         Margin="10,10,0,0" 
                         TextWrapping="Wrap" 
-                        Text="{Binding StartPressureValue}" 
+                        Text="{Binding EmulationName}" 
                         VerticalAlignment="Top" 
                         Width="205"/>
                     <TextBox 
@@ -138,7 +138,7 @@
                         HorizontalAlignment="Left" 
                         Margin="10,34,0,0" 
                         TextWrapping="Wrap" 
-                        Text="{Binding StartPressureValue}" 
+                        Text="{Binding EmulationDate}" 
                         VerticalAlignment="Top" 
                         Width="205"/>
                 </Grid>
@@ -165,7 +165,7 @@
                         Margin="10,45,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="151"
-                        Command="{Binding StartCommand}" FontSize="12"/>
+                        FontSize="12"/>
                     <Button 
                         x:Name="SortByDateButton" 
                         Content="Сортировать по дате" 
@@ -173,9 +173,9 @@
                         Margin="10,80,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="151"
-                        Command="{Binding StartCommand}" FontSize="12"/>
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="10,115,633,10">
-                        <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}"/>
+                        FontSize="12"/>
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="10,115,10,10" Width="151" Height="280" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}" Margin="-1,0,-1,0"/>
                     </Border>
                 </Grid>
             </TabItem>
