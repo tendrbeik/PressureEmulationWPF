@@ -7,15 +7,25 @@
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+
+    <Window.DataContext>
+        <local:MainViewModel/>
+    </Window.DataContext>
+
     <Grid>
         <TabControl>
             <TabItem x:Name="EmulationTab" Header="Эмуляция" FontFamily="Verdana" FontSize="14">
                 <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="370*"/>
+                        <ColumnDefinition Width="15*"/>
+                        <ColumnDefinition Width="409*"/>
+                    </Grid.ColumnDefinitions>
                     <Button 
                         x:Name="StartButton" 
                         Content="Старт" 
                         HorizontalAlignment="Left" 
-                        Margin="10,100,0,0" 
+                        Margin="10,330,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="60"
                         Command="{Binding StartCommand}"/>
@@ -23,27 +33,151 @@
                         x:Name="StopButton" 
                         Content="Стоп" 
                         HorizontalAlignment="Left" 
-                        Margin="10,135,0,0" 
+                        Margin="10,365,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" 
                         Width="60"
                         Command="{Binding StopCommand}"/>
-                    <TextBox x:Name="UpperPressureLimit" HorizontalAlignment="Left" Margin="10,76,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="120" FontFamily="Verdana" FontSize="14" AutomationProperties.HelpText="Верхний предел давления задаётся числом с плавающей точкой. Пример - &quot;19.3&quot;."/>
-                    <RadioButton x:Name="ConstantPressureMode" Content="Постоянное давление" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="12" GroupName="PressureMode"/>
-                    <RadioButton x:Name="RandomPressureMode" Content="Случайное давление" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top" FontSize="12" GroupName="PressureMode" IsChecked="True"/>
+                    <TextBox 
+                        x:Name="UpperPressureLimit" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,104,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding HigherPressureLimit}" 
+                        VerticalAlignment="Top" 
+                        Width="120" 
+                        FontFamily="Verdana" 
+                        FontSize="14" 
+                        AutomationProperties.HelpText="Верхний предел давления задаётся числом с плавающей точкой. Пример - &quot;19.3&quot;."/>
+                    <RadioButton 
+                        x:Name="ConstantPressureMode" 
+                        Content="Постоянное давление" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,10,0,0" 
+                        VerticalAlignment="Top" 
+                        FontSize="12" 
+                        GroupName="PressureMode"
+                        IsChecked="{Binding ConstantPressureMode}"/>
+                    <RadioButton 
+                        x:Name="RandomPressureMode" 
+                        Content="Случайное давление" 
+                        HorizontalAlignment="Left"
+                        Margin="10,29,0,0" 
+                        VerticalAlignment="Top" 
+                        FontSize="12" 
+                        GroupName="PressureMode" 
+                        IsChecked="{Binding RandomPressureMode}"/>
                     <lvc:CartesianChart 
                         SyncContext="{Binding Sync}"
                         Series="{Binding Series}"
                         XAxes="{Binding XAxes}"
                         YAxes="{Binding YAxes}"
-                        x:Name="EmulationChart" 
+                        x:Name="ETEmulationChart" 
+                        Margin="185,10,10,10" 
+                        Background="White" 
+                        BorderBrush="Black" Grid.ColumnSpan="3"/>
+                    <Label Content="Верхний предел давления" HorizontalAlignment="Left" Margin="10,77,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
+                    <TextBox 
+                        x:Name="ConstantPressureValue" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,162,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding ConstantPressureValue}" 
+                        VerticalAlignment="Top" 
+                        Width="120"/>
+                    <TextBox 
+                        x:Name="PressureDelta" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,267,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding PressureDelta}" 
+                        VerticalAlignment="Top" 
+                        Width="120"/>
+                    <Label Content="Шаг изменения давления" HorizontalAlignment="Left" Margin="10,240,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,128,0,0" TextWrapping="Wrap" Text="Величина постоянного давления" VerticalAlignment="Top" Height="29" Width="128" FontSize="10"/>
+                    <RadioButton 
+                        x:Name="ConstantChangingPressureMode" 
+                        Content="Растущее/Убывающее д." 
+                        HorizontalAlignment="Left" 
+                        Margin="10,48,0,0" 
+                        VerticalAlignment="Top" 
+                        FontSize="12" 
+                        GroupName="PressureMode"
+                        IsChecked="{Binding ConstantChangingPressureMode}"/>
+                    <TextBox 
+                        x:Name="StartPressureValue" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,213,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding StartPressureValue}" 
+                        VerticalAlignment="Top" 
+                        Width="120"/>
+                    <Label Content="Стартовое значение давления" HorizontalAlignment="Left" Margin="10,186,0,0" VerticalAlignment="Top" Width="170" FontSize="10"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="SaveLastEmulationTab" Header="Сохранить последнюю эмуляцию" FontFamily="Verdana" FontSize="14">
+                <Grid Background="#FFE5E5E5">
+                    <Button 
+                        x:Name="SaveLastEmulation" 
+                        Content="Сохранить последнюю эмуляцию" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,58,0,0" 
+                        VerticalAlignment="Top" 
+                        Height="30" Width="205"
+                        Command="{Binding StartCommand}" FontSize="10"/>
+                    <TextBox 
+                        x:Name="EmulationName" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,10,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding StartPressureValue}" 
+                        VerticalAlignment="Top" 
+                        Width="205"/>
+                    <TextBox 
+                        x:Name="EmulationDate" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,34,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding StartPressureValue}" 
+                        VerticalAlignment="Top" 
+                        Width="205"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="WatchSavedEmulation" Header="Просмотр сохранённых эмуляций" FontFamily="Verdana" FontSize="14">
+                <Grid Background="#FFE5E5E5">
+                    <lvc:CartesianChart 
+                        x:Name="WSEEmulationChart" 
                         Margin="185,10,10,10" 
                         Background="White" 
                         BorderBrush="Black"/>
+                    <Button 
+                        x:Name="DrawGraphButton" 
+                        Content="Отобразить график" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,10,0,0" 
+                        VerticalAlignment="Top" 
+                        Height="30" Width="151"
+                        Command="{Binding StartCommand}"/>
+                    <Button 
+                        x:Name="SortByNameButton" 
+                        Content="Сортировать по имени" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,45,0,0" 
+                        VerticalAlignment="Top" 
+                        Height="30" Width="151"
+                        Command="{Binding StartCommand}" FontSize="12"/>
+                    <Button 
+                        x:Name="SortByDateButton" 
+                        Content="Сортировать по дате" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,80,0,0" 
+                        VerticalAlignment="Top" 
+                        Height="30" Width="151"
+                        Command="{Binding StartCommand}" FontSize="12"/>
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="10,115,633,10">
+                        <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}"/>
+                    </Border>
                 </Grid>
-            </TabItem>
-            <TabItem Header="TabItem">
-                <Grid Background="#FFE5E5E5"/>
             </TabItem>
         </TabControl>
 
