@@ -19,7 +19,8 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="370*"/>
                         <ColumnDefinition Width="15*"/>
-                        <ColumnDefinition Width="409*"/>
+                        <ColumnDefinition Width="56*"/>
+                        <ColumnDefinition Width="353*"/>
                     </Grid.ColumnDefinitions>
                     <Button 
                         x:Name="StartButton" 
@@ -67,15 +68,14 @@
                         FontSize="12" 
                         GroupName="PressureMode" 
                         IsChecked="{Binding RandomPressureMode}"/>
-                    <lvc:CartesianChart 
-                        SyncContext="{Binding Sync}"
+                    <lvc:CartesianChart
                         Series="{Binding Series}"
                         XAxes="{Binding XAxes}"
                         YAxes="{Binding YAxes}"
                         x:Name="ETEmulationChart" 
                         Margin="185,10,10,10" 
                         Background="White" 
-                        BorderBrush="Black" Grid.ColumnSpan="3"/>
+                        BorderBrush="Black" Grid.ColumnSpan="4"/>
                     <Label Content="Верхний предел давления" HorizontalAlignment="Left" Margin="10,77,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
                     <TextBox 
                         x:Name="ConstantPressureValue" 
@@ -145,7 +145,10 @@
             </TabItem>
             <TabItem x:Name="WatchSavedEmulation" Header="Просмотр сохранённых эмуляций" FontFamily="Verdana" FontSize="14">
                 <Grid Background="#FFE5E5E5">
-                    <lvc:CartesianChart 
+                    <lvc:CartesianChart
+                        Series="{Binding SeriesWSE}"
+                        XAxes="{Binding XAxesWSE}"
+                        YAxes="{Binding YAxesWSE}"
                         x:Name="WSEEmulationChart" 
                         Margin="185,10,10,10" 
                         Background="White" 
@@ -157,25 +160,22 @@
                         Margin="10,10,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="151"
-                        Command="{Binding StartCommand}"/>
-                    <Button 
-                        x:Name="SortByNameButton" 
-                        Content="Сортировать по имени" 
-                        HorizontalAlignment="Left" 
-                        Margin="10,45,0,0" 
-                        VerticalAlignment="Top" 
-                        Height="30" Width="151"
-                        FontSize="12"/>
-                    <Button 
-                        x:Name="SortByDateButton" 
-                        Content="Сортировать по дате" 
-                        HorizontalAlignment="Left" 
-                        Margin="10,80,0,0" 
-                        VerticalAlignment="Top" 
-                        Height="30" Width="151"
-                        FontSize="12"/>
+                        Command="{Binding DrawGraphCommand}"/>
                     <Border BorderBrush="Black" BorderThickness="1" Margin="10,115,10,10" Width="151" Height="280" HorizontalAlignment="Left" VerticalAlignment="Top">
-                        <DataGrid d:ItemsSource="{d:SampleData ItemCount=5}" Margin="-1,0,-1,0"/>
+                        <DataGrid
+                            ItemsSource="{Binding Emulations}"
+                            AutoGenerateColumns="False"
+                            Margin="-1,0,-1,0"
+                            SelectedItem="{Binding SelectedEmulation}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Header="Name"
+                                    Binding="{Binding Name}"/>
+                                <DataGridTextColumn 
+                                    Header="Date"
+                                    Binding="{Binding Date}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </Border>
                 </Grid>
             </TabItem>

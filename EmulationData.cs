@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace PressureEmulationWPF
 {
-    internal class EmualtionData
+    internal class EmulationData
     {
         public String Name { get; set; }
         public DateTime Date { get; set; }
-        public List<ObservablePoint> Values = [];
+        public List<MyPoint> Values { get; set; } = new List<MyPoint>();
     }
 }

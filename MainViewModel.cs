@@ -18,7 +18,7 @@ namespace PressureEmulationWPF
         //модификатор доступа private. Возможно придётся убрать этот модификтор.
         //описание свойств использующихся во вкладке TabItem EmulationTab
         private readonly Random _random = new();
-        private readonly List<ObservablePoint> _values = [];
+        private readonly List<ObservablePoint> _values = new List<ObservablePoint>();
         private double _higherPressureLimit = 150;
         private double _constantPressureValue = 300;
         private double _startPressureValue = 300;
@@ -31,6 +31,11 @@ namespace PressureEmulationWPF
         //Описание полей для вкладки TabItem SaveLastEmulationTab
         private string _emulationName = "Эмуляция";
         private DateTime _emulationDate = DateTime.Now;
+
+        //Описание полей для вкладки TabItem WatchSavedEmulation
+        private ObservableCollection<EmulationData> _emulations;
+        private EmulationData _selectedEmulation;
+        private readonly List<ObservablePoint> _valuesWSE = [];
         #endregion
 
         #region Геттеры и сеттеры
@@ -100,11 +105,14 @@ namespace PressureEmulationWPF
         public ICommand StartCommand { get; }
         public ICommand StopCommand { get; }
 
+
+
         //Описание геттеров и сеттеров для вкладки TabItem SaveLastEmulationTab
         public string EmulationName
         {
             get => _emulationName;
-            set {
+            set
+            {
                 if (value.Length == 0) return;
                 _emulationName = value;
             }
@@ -116,6 +124,32 @@ namespace PressureEmulationWPF
         }
         public ICommand SaveEmulationCommand { get; }
 
+        //Описание геттеров и сеттеров для вкладки TabItem WatchSavedEmulation
+        public ObservableCollection<EmulationData> Emulations
+        {
+            get => _emulations;
+            set
+            {
+                _emulations = value;
+                //OnPropertyChanged();
+            }
+        }
+
+        public EmulationData SelectedEmulation
+        {
+            get => _selectedEmulation;
+            set
+            {
+                if (value == null) return;
+                _selectedEmulation = value;
+            }
+        }
+
+        public ICommand DrawGraphCommand { get; }
+
+        public ObservableCollection<ISeries> SeriesWSE { get; set; }
+        public List<Axis> XAxesWSE { get; set; }
+        public List<Axis> YAxesWSE { get; set; }
         #endregion
 
 
@@ -172,6 +206,45 @@ namespace PressureEmulationWPF
             SaveEmulationCommand = new MyCommand(_ =>
             {
                 SaveEmulation();
+            });
+
+            //Описываем всё что нужно для работы TabItem WatchSavedEmulation
+            SeriesWSE = [
+                new LineSeries<ObservablePoint>
+            {
+                Values = _valuesWSE,
+                Fill = null,
+                GeometryFill = null,
+                GeometryStroke = null
+            }
+            ];
+
+            XAxesWSE = new List<Axis>{
+                new Axis()
+                {
+                    Name = "Время (секунды)",
+                    NamePaint = new SolidColorPaint(SKColors.Black),
+
+                    LabelsPaint = new SolidColorPaint(SKColors.Blue),
+                    TextSize = 10,
+
+                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray) { StrokeThickness = 2 }
+                }
+            };
+
+            YAxesWSE = new List<Axis>{
+                new Axis()
+                {
+                    Name = "Давление (условные единицы)"
+                }
+            };
+
+            var emulationsFromDB = LoadEmulationsFromDB();
+            _emulations = new ObservableCollection<EmulationData>(emulationsFromDB);
+            DrawGraphCommand = new MyCommand(_ =>
+            {
+                var chartData = ConvertValuesToObservableList(_selectedEmulation.Values);
+                DrawChart(chartData);
             });
         }
 
@@ -281,13 +354,13 @@ namespace PressureEmulationWPF
                 return;
             using (var db = new LiteDatabase(@"Data.db"))
             {
-                var col = db.GetCollection<EmualtionData>("Emulations");
+                var col = db.GetCollection<EmulationData>("Emulations");
 
-                var emulation = new EmualtionData
+                var emulation = new EmulationData
                 {
                     Name = _emulationName,
                     Date = _emulationDate,
-                    Values = _values
+                    Values = ConvertValuesToMyPoint(_values)
                 };
 
                 col.EnsureIndex(x => x.Name);
@@ -297,10 +370,52 @@ namespace PressureEmulationWPF
 
                 col.Insert(emulation);
 
-                EmualtionData result = col.Find(x => x.Name.Equals(_emulationName)).First();
+                //EmualtionData result = col.Find(x => x.Name.Equals(_emulationName)).First();
+            }
+            //Обновляем коллекцию Emulations
+            var emulationsFromDB = LoadEmulationsFromDB();
+            _emulations = new ObservableCollection<EmulationData>(emulationsFromDB);
+        }
+
+        private List<EmulationData> LoadEmulationsFromDB()
+        {
+            using (var db = new LiteDatabase(@"Data.db"))
+            {
+                var emulationsCol = db.GetCollection<EmulationData>("Emulations");
+                var result = emulationsCol.FindAll().ToList();
+                return result;
             }
         }
+
+        private List<MyPoint> ConvertValuesToMyPoint(List<ObservablePoint> values) { 
+            List<MyPoint> resultValues = new List<MyPoint>();
+            foreach (var value in values)
+            {
+                MyPoint point = new MyPoint();
+                point.X = value.X;
+                point.Y = value.Y;
+                resultValues.Add(point);
+            }
+            return resultValues;
+        }
+
+        private List<ObservablePoint> ConvertValuesToObservableList(List<MyPoint> values)
+        {
+            List<ObservablePoint> resultValues = new List<ObservablePoint>();
+            foreach(var value in values)
+            {
+                resultValues.Add(new ObservablePoint(value.X, value.Y));
+            }
+            return resultValues;
+        }
         #endregion
+
+        private void DrawChart(List<ObservablePoint> values)
+        {
+            if (values == null) return;
+            _valuesWSE.Clear();
+            _valuesWSE.AddRange(values);
+        }
         private double[] GetSeparators(double emulationTime, double lastSecondsAmount, int delay)
         {
             int sepsAmount = (int)(lastSecondsAmount * 1000d / (double)delay);
