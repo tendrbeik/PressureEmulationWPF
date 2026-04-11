@@ -6,19 +6,21 @@ using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using LiteDB;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace PressureEmulationWPF
 {
     //TODO: Надо сделать код класса гибче, чтобы можно было изменить одну переменную и на графике отображались бы не 25 последних секунд, а 30 или 10
     //TODO: Надо почистить код класса от мусора.
-    internal class MainViewModel
+    internal class MainViewModel : INotifyPropertyChanged
     {
         #region Private-свойства класса
         //TODO: Надо узнать зачем тут вообще Readonly, если мы и так задали
         //модификатор доступа private. Возможно придётся убрать этот модификтор.
         //описание свойств использующихся во вкладке TabItem EmulationTab
         private readonly Random _random = new();
-        private readonly List<ObservablePoint> _values = new List<ObservablePoint>();
+        private readonly ObservableCollection<ObservablePoint> _values = new ObservableCollection<ObservablePoint>();
         private double _higherPressureLimit = 150;
         private double _constantPressureValue = 300;
         private double _startPressureValue = 300;
@@ -35,7 +37,7 @@ namespace PressureEmulationWPF
         //Описание полей для вкладки TabItem WatchSavedEmulation
         private ObservableCollection<EmulationData> _emulations;
         private EmulationData _selectedEmulation;
-        private readonly List<ObservablePoint> _valuesWSE = [];
+        private readonly ObservableCollection<ObservablePoint> _valuesWSE = new ObservableCollection<ObservablePoint>();
         #endregion
 
         #region Геттеры и сеттеры
@@ -131,7 +133,7 @@ namespace PressureEmulationWPF
             set
             {
                 _emulations = value;
-                //OnPropertyChanged();
+                OnPropertyChanged("Emulations");
             }
         }
 
@@ -147,7 +149,10 @@ namespace PressureEmulationWPF
 
         public ICommand DrawGraphCommand { get; }
 
-        public ObservableCollection<ISeries> SeriesWSE { get; set; }
+        public ObservableCollection<ISeries> SeriesWSE {
+            get;
+            set;
+        }
         public List<Axis> XAxesWSE { get; set; }
         public List<Axis> YAxesWSE { get; set; }
         #endregion
@@ -243,7 +248,7 @@ namespace PressureEmulationWPF
             _emulations = new ObservableCollection<EmulationData>(emulationsFromDB);
             DrawGraphCommand = new MyCommand(_ =>
             {
-                var chartData = ConvertValuesToObservableList(_selectedEmulation.Values);
+                var chartData = ConvertValuesToObservableCollection(_selectedEmulation.Values);
                 DrawChart(chartData);
             });
         }
@@ -374,7 +379,7 @@ namespace PressureEmulationWPF
             }
             //Обновляем коллекцию Emulations
             var emulationsFromDB = LoadEmulationsFromDB();
-            _emulations = new ObservableCollection<EmulationData>(emulationsFromDB);
+            Emulations = new ObservableCollection<EmulationData>(emulationsFromDB);
         }
 
         private List<EmulationData> LoadEmulationsFromDB()
@@ -387,7 +392,7 @@ namespace PressureEmulationWPF
             }
         }
 
-        private List<MyPoint> ConvertValuesToMyPoint(List<ObservablePoint> values) { 
+        private List<MyPoint> ConvertValuesToMyPoint(ObservableCollection<ObservablePoint> values) { 
             List<MyPoint> resultValues = new List<MyPoint>();
             foreach (var value in values)
             {
@@ -399,9 +404,9 @@ namespace PressureEmulationWPF
             return resultValues;
         }
 
-        private List<ObservablePoint> ConvertValuesToObservableList(List<MyPoint> values)
+        private ObservableCollection<ObservablePoint> ConvertValuesToObservableCollection(List<MyPoint> values)
         {
-            List<ObservablePoint> resultValues = new List<ObservablePoint>();
+            ObservableCollection<ObservablePoint> resultValues = new ObservableCollection<ObservablePoint>();
             foreach(var value in values)
             {
                 resultValues.Add(new ObservablePoint(value.X, value.Y));
@@ -410,11 +415,14 @@ namespace PressureEmulationWPF
         }
         #endregion
 
-        private void DrawChart(List<ObservablePoint> values)
+        private void DrawChart(ObservableCollection<ObservablePoint> values)
         {
             if (values == null) return;
             _valuesWSE.Clear();
-            _valuesWSE.AddRange(values);
+            foreach(var value in values)
+            {
+                _valuesWSE.Add(value);
+            }       
         }
         private double[] GetSeparators(double emulationTime, double lastSecondsAmount, int delay)
         {
@@ -425,6 +433,13 @@ namespace PressureEmulationWPF
                 seps[i] = emulationTime - delay * i / 1000d;
             }
             return seps;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName]string prop = "")
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
     }
 }
