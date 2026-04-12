@@ -55,11 +55,6 @@ namespace PressureEmulationWPF
             get { return _upperPressureLimit; }
             set
             {
-                if (value <= 0)
-                {
-                    //_showError("Вы неправильно задали верхний предел давления. Он задаётся неотрицательным дробным числом по следующему образцу - \"19.99\"");
-                    return;
-                }
                 _upperPressureLimit = value;
                 OnPropertyChanged("UpperPressureLimit");
             }
@@ -70,11 +65,6 @@ namespace PressureEmulationWPF
             get { return _constantPressureValue; }
             set
             {
-                if (value <= 0)
-                {
-                    //_showError("Вы неправильно задали постоянное значение давления. Оно задаётся неотрицательным дробным числом по следующему образцу - \"19.99\"");
-                    return;
-                }
                 _constantPressureValue = value;
                 OnPropertyChanged("ConstantPressureValue");
             }
@@ -85,11 +75,6 @@ namespace PressureEmulationWPF
             get { return _startPressureValue; }
             set
             {
-                if (value <= 0)
-                {
-                    //_showError("Вы неправильно задали стартовое значение давления. Оно задаётся неотрицательным дробным числом по следующему образцу - \"19.99\"");
-                    return;
-                }
                 _startPressureValue = value;
                 OnPropertyChanged("StartPressureValue");
             }
