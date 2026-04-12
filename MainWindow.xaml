@@ -6,8 +6,29 @@
         xmlns:local="clr-namespace:PressureEmulationWPF"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="550" Width="800">
 
+    <Window.Resources>
+        <ControlTemplate x:Key="validationTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Border BorderBrush="Red" BorderThickness="2">
+                    <AdornedElementPlaceholder />
+                </Border>
+                <TextBlock Foreground="Red" FontSize="14" FontWeight="Bold">!</TextBlock>
+            </StackPanel>
+        </ControlTemplate>
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                Value="{Binding RelativeSource={RelativeSource Self},
+                    Path=(Validation.Errors)[0].ErrorContent}" />
+                    <Setter Property="Foreground" Value="Red" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
     <Grid>
         <TabControl>
             <TabItem x:Name="EmulationTab" Header="Эмуляция" FontFamily="Verdana" FontSize="14">
@@ -22,35 +43,44 @@
                         x:Name="StartButton" 
                         Content="Старт" 
                         HorizontalAlignment="Left" 
-                        Margin="10,330,0,0" 
+                        Margin="10,287,0,0" 
                         VerticalAlignment="Top" 
-                        Height="30" Width="60"
-                        Command="{Binding StartCommand}"/>
+                        Height="30" Width="120"
+                        Click="StartButton_Click"/>
                     <Button 
                         x:Name="StopButton" 
                         Content="Стоп" 
                         HorizontalAlignment="Left" 
-                        Margin="10,365,0,0" 
+                        Margin="10,322,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" 
-                        Width="60"
+                        Width="120"
                         Command="{Binding StopCommand}"/>
-                    <TextBox 
+                    <TextBox
                         x:Name="UpperPressureLimit" 
                         HorizontalAlignment="Left" 
-                        Margin="10,104,0,0" 
-                        TextWrapping="Wrap" 
-                        Text="{Binding HigherPressureLimit}" 
+                        Margin="10,56,0,0" 
                         VerticalAlignment="Top" 
                         Width="120" 
                         FontFamily="Verdana" 
                         FontSize="14" 
-                        AutomationProperties.HelpText="Верхний предел давления задаётся числом с плавающей точкой. Пример - &quot;19.3&quot;."/>
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error"
+                        AutomationProperties.HelpText="Верхний предел давления задаётся числом с плавающей точкой. Пример - &quot;19.3&quot;." Height="20">
+                        <TextBox.Text>
+                            <Binding Path="UpperPressureLimit" 
+                                     NotifyOnValidationError="True">
+                                <Binding.ValidationRules>
+                                    <local:PositiveDoubleValueRule/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <RadioButton 
                         x:Name="ConstantPressureMode" 
                         Content="Постоянное давление" 
                         HorizontalAlignment="Left" 
-                        Margin="10,10,0,0" 
+                        Margin="10,81,0,0" 
                         VerticalAlignment="Top" 
                         FontSize="12" 
                         GroupName="PressureMode"
@@ -59,7 +89,7 @@
                         x:Name="RandomPressureMode" 
                         Content="Случайное давление" 
                         HorizontalAlignment="Left"
-                        Margin="10,29,0,0" 
+                        Margin="10,10,0,0" 
                         VerticalAlignment="Top" 
                         FontSize="12" 
                         GroupName="PressureMode" 
@@ -72,43 +102,73 @@
                         Margin="185,10,10,10" 
                         Background="White" 
                         BorderBrush="Black" Grid.ColumnSpan="4"/>
-                    <Label Content="Верхний предел давления" HorizontalAlignment="Left" Margin="10,77,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
+                    <Label Content="Верхний предел давления" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
                     <TextBox 
                         x:Name="ConstantPressureValue" 
                         HorizontalAlignment="Left" 
-                        Margin="10,162,0,0" 
-                        TextWrapping="Wrap" 
-                        Text="{Binding ConstantPressureValue}" 
+                        Margin="10,134,0,0" 
+                        TextWrapping="Wrap"
                         VerticalAlignment="Top" 
-                        Width="120"/>
+                        Width="120"
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        <TextBox.Text>
+                            <Binding Path="ConstantPressureValue"
+                                     NotifyOnValidationError="True">
+                                <Binding.ValidationRules>
+                                    <local:PositiveDoubleValueRule/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <TextBox 
                         x:Name="PressureDelta" 
                         HorizontalAlignment="Left" 
-                        Margin="10,267,0,0" 
-                        TextWrapping="Wrap" 
-                        Text="{Binding PressureDelta}" 
+                        Margin="10,262,0,0" 
+                        TextWrapping="Wrap"
                         VerticalAlignment="Top" 
-                        Width="120"/>
-                    <Label Content="Шаг изменения давления" HorizontalAlignment="Left" Margin="10,240,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="10,128,0,0" TextWrapping="Wrap" Text="Величина постоянного давления" VerticalAlignment="Top" Height="29" Width="128" FontSize="10"/>
+                        Width="120"
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        <TextBox.Text>
+                            <Binding Path="PressureDelta"
+                                     NotifyOnValidationError="True">
+                                <Binding.ValidationRules>
+                                    <local:DoubleValueRule/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <Label Content="Шаг изменения давления" HorizontalAlignment="Left" Margin="10,235,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,100,0,0" TextWrapping="Wrap" Text="Величина постоянного давления" VerticalAlignment="Top" Height="29" Width="128" FontSize="10"/>
                     <RadioButton 
                         x:Name="ConstantChangingPressureMode" 
-                        Content="Растущее/Убывающее д." 
+                        Content="Раст./Убыв. давление" 
                         HorizontalAlignment="Left" 
-                        Margin="10,48,0,0" 
+                        Margin="10,159,0,0" 
                         VerticalAlignment="Top" 
                         FontSize="12" 
                         GroupName="PressureMode"
-                        IsChecked="{Binding ConstantChangingPressureMode}"/>
+                        IsChecked="{Binding ConstantChangingPressureMode}" Height="19" Width="170"/>
                     <TextBox 
                         x:Name="StartPressureValue" 
                         HorizontalAlignment="Left" 
-                        Margin="10,213,0,0" 
+                        Margin="10,210,0,0" 
                         TextWrapping="Wrap" 
-                        Text="{Binding StartPressureValue}" 
                         VerticalAlignment="Top" 
-                        Width="120"/>
-                    <Label Content="Стартовое значение давления" HorizontalAlignment="Left" Margin="10,186,0,0" VerticalAlignment="Top" Width="170" FontSize="10"/>
+                        Width="120"    
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        <TextBox.Text>
+                            <Binding Path="StartPressureValue"
+                                     NotifyOnValidationError="True">
+                                <Binding.ValidationRules>
+                                    <local:PositiveDoubleValueRule/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <Label Content="Стартовое значение давления" HorizontalAlignment="Left" Margin="10,183,0,0" VerticalAlignment="Top" Width="170" FontSize="10"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="SaveLastEmulationTab" Header="Сохранить последнюю эмуляцию" FontFamily="Verdana" FontSize="14">
@@ -117,26 +177,47 @@
                         x:Name="SaveLastEmulation" 
                         Content="Сохранить последнюю эмуляцию" 
                         HorizontalAlignment="Left" 
-                        Margin="10,58,0,0" 
+                        Margin="10,127,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="205"
-                        Command="{Binding SaveEmulationCommand}" FontSize="10"/>
+                        FontSize="10" 
+                        Click="SaveLastEmulation_Click"/>
                     <TextBox 
                         x:Name="EmulationName" 
                         HorizontalAlignment="Left" 
                         Margin="10,10,0,0" 
                         TextWrapping="Wrap" 
-                        Text="{Binding EmulationName}" 
                         VerticalAlignment="Top" 
-                        Width="205"/>
+                        Width="205"
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        <TextBox.Text>
+                            <Binding Path="EmulationName"
+                                     NotifyOnValidationError="True">
+                                <Binding.ValidationRules>
+                                    <local:EmulationNameRule/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                     <TextBox 
                         x:Name="EmulationDate" 
                         HorizontalAlignment="Left" 
-                        Margin="10,34,0,0" 
+                        Margin="10,35,0,0" 
                         TextWrapping="Wrap" 
-                        Text="{Binding EmulationDate}" 
                         VerticalAlignment="Top" 
-                        Width="205"/>
+                        Width="205"
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        <TextBox.Text>
+                            <Binding Path="EmulationDate" NotifyOnValidationError="True">
+                                <Binding.ValidationRules>
+                                    <local:DateTimeValueRule/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <TextBox HorizontalAlignment="Left" Margin="10,60,0,0" TextWrapping="Wrap" Text="Образец для ввода даты и времени &quot;4/15/2026 7:53:52 PM&quot;" VerticalAlignment="Top" Width="205" Height="62" IsReadOnly="True" Background="Transparent" BorderBrush="#00ABADB8"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="WatchSavedEmulation" Header="Просмотр сохранённых эмуляций" FontFamily="Verdana" FontSize="14">
@@ -158,14 +239,13 @@
                         VerticalAlignment="Top" 
                         Height="30" Width="151"
                         Command="{Binding DrawGraphCommand}"/>
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="10,115,0,0" Width="254" Height="280" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="10,45,0,10" Width="266" HorizontalAlignment="Left">
                         <DataGrid
                             ItemsSource="{Binding Emulations}"
                             AutoGenerateColumns="False"
-                            Margin="-1,0,-1,0"
                             SelectedItem="{Binding SelectedEmulation}"
                             SelectionMode="Single" 
-                            IsReadOnly="True">
+                            IsReadOnly="True" FontSize="10">
                             <DataGrid.Columns>
                                 <DataGridTextColumn
                                     Header="Name"
