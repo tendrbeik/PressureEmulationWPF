@@ -8,10 +8,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
-    <Window.DataContext>
-        <local:MainViewModel/>
-    </Window.DataContext>
-
     <Grid>
         <TabControl>
             <TabItem x:Name="EmulationTab" Header="Эмуляция" FontFamily="Verdana" FontSize="14">
@@ -150,9 +146,10 @@
                         XAxes="{Binding XAxesWSE}"
                         YAxes="{Binding YAxesWSE}"
                         x:Name="WSEEmulationChart" 
-                        Margin="185,10,10,10" 
+                        Margin="281,10,10,10" 
                         Background="White" 
-                        BorderBrush="Black"/>
+                        BorderBrush="Black"
+                        ZoomMode="Both"/>
                     <Button 
                         x:Name="DrawGraphButton" 
                         Content="Отобразить график" 
@@ -161,12 +158,14 @@
                         VerticalAlignment="Top" 
                         Height="30" Width="151"
                         Command="{Binding DrawGraphCommand}"/>
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="10,115,10,10" Width="151" Height="280" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="10,115,0,0" Width="254" Height="280" HorizontalAlignment="Left" VerticalAlignment="Top">
                         <DataGrid
                             ItemsSource="{Binding Emulations}"
                             AutoGenerateColumns="False"
                             Margin="-1,0,-1,0"
-                            SelectedItem="{Binding SelectedEmulation}">
+                            SelectedItem="{Binding SelectedEmulation}"
+                            SelectionMode="Single" 
+                            IsReadOnly="True">
                             <DataGrid.Columns>
                                 <DataGridTextColumn
                                     Header="Name"

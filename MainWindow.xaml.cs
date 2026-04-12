@@ -19,7 +19,15 @@ namespace PressureEmulationWPF
         public MainWindow()
         {
             InitializeComponent();
-            //DataContext = new MainViewModel();
+            var MVM = new MainViewModel(
+                showError: msg => MessageBox.Show(
+                    msg,
+                    "Ошибка",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                    )
+                );
+            DataContext = MVM;
         }
     }
 }
