@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Text.Json;
+using FluentModbus;
 
 namespace PressureEmulationWPF
 {
@@ -36,10 +37,16 @@ namespace PressureEmulationWPF
         private string _emulationName = "Эмуляция";
         private DateTime _emulationDate = DateTime.Now;
 
-        //Описание полей для вкладки TabItem WatchSavedEmulation
+        //Описание полей для вкладки TabItem WatchSavedEmulationTab
         private ObservableCollection<EmulationData> _emulations;
         private EmulationData _selectedEmulation;
         private readonly ObservableCollection<ObservablePoint> _valuesWSE = new ObservableCollection<ObservablePoint>();
+
+        //Описание полей для вкладки TabItem ModbusSlave
+        private string _slaveIP = "127.0.0.1";
+        private string _slavePort = "502";
+        private string _slaveID = "1";
+        private ModbusTcpClient _client = new ModbusTcpClient();
 
         //Описание Action<string> делегата для вывода сообщений об ошибках на форму
         private readonly Action<string> _showError;
@@ -163,6 +170,7 @@ namespace PressureEmulationWPF
 
         public EmulationData SelectedEmulation
         {
+            //TODO: Надо проверить есть ли проверка на NULL где-нибудь в другом месте. Если есть, то тут надо убрать.
             get => _selectedEmulation;
             set
             {
@@ -181,6 +189,37 @@ namespace PressureEmulationWPF
         }
         public List<Axis> XAxesWSE { get; set; }
         public List<Axis> YAxesWSE { get; set; }
+
+        //Описание геттеров и сеттеров для вкладки TabItem ModbusSlave
+        public string SlaveIP
+        {
+            get => _slaveIP;
+            set
+            {
+                _slaveIP = value;
+                OnPropertyChanged("SlaveIP");
+            }
+        }
+
+        public string SlavePort
+        {
+            get => _slavePort;
+            set
+            {
+                _slavePort = value;
+                OnPropertyChanged("SlavePort");
+            }
+        }
+
+        public string SlaveID
+        {
+            get => _slaveID;
+            set
+            {
+                _slaveIP = value;
+                OnPropertyChanged("SlaveID");
+            }
+        }
         #endregion
 
 
