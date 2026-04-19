@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PressureEmulationWPF"
+        xmlns:rules="clr-namespace:PressureEmulationWPF.View.ValidationRules"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="550" Width="800">
@@ -71,7 +72,7 @@
                             <Binding Path="UpperPressureLimit" 
                                      NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
-                                    <local:PositiveDoubleValueRule/>
+                                    <rules:PositiveDoubleValueRule/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -116,7 +117,7 @@
                             <Binding Path="ConstantPressureValue"
                                      NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
-                                    <local:PositiveDoubleValueRule/>
+                                    <rules:PositiveDoubleValueRule/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -134,7 +135,7 @@
                             <Binding Path="PressureDelta"
                                      NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
-                                    <local:DoubleValueRule/>
+                                    <rules:DoubleValueRule/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -163,7 +164,7 @@
                             <Binding Path="StartPressureValue"
                                      NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
-                                    <local:PositiveDoubleValueRule/>
+                                    <rules:PositiveDoubleValueRule/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -195,7 +196,7 @@
                             <Binding Path="EmulationName"
                                      NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
-                                    <local:EmulationNameRule/>
+                                    <rules:EmulationNameRule/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -212,7 +213,7 @@
                         <TextBox.Text>
                             <Binding Path="EmulationDate" NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
-                                    <local:DateTimeValueRule/>
+                                    <rules:DateTimeValueRule/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </TextBox.Text>
@@ -272,7 +273,7 @@
                         <Binding Path="SlaveIP"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <local:EmulationNameRule/>
+                                <rules:EmulationNameRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
@@ -288,7 +289,7 @@
                         <Binding Path="SlavePort"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <local:EmulationNameRule/>
+                                <rules:EmulationNameRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
@@ -304,7 +305,7 @@
                         <Binding Path="SlaveID"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <local:EmulationNameRule/>
+                                <rules:EmulationNameRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
@@ -338,7 +339,7 @@
                         <Binding Path="InputRegisterAddress"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <local:EmulationNameRule/>
+                                <rules:EmulationNameRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>

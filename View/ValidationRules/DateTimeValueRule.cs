@@ -12,8 +12,8 @@ namespace PressureEmulationWPF.View.ValidationRules
             {
                 if (((string)value).Length == 0)
                     return new ValidationResult(false, $"Дата не может быть пустой строкой!");
-                if (((string)value).Length > 0)
-                    resultValue = DateTime.Parse((string)value, CultureInfo.InvariantCulture);
+
+                resultValue = DateTime.Parse((string)value, CultureInfo.InvariantCulture);
             }
             catch (Exception e)
             {

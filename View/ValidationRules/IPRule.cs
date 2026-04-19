@@ -13,13 +13,13 @@ namespace PressureEmulationWPF.View.ValidationRules
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            var resultValue;
+            IPAddress resultValue;
             try
             {
                 if (((string)value).Length == 0)
                     return new ValidationResult(false, $"IP не может быть пустой строкой!");
-                if (((string)value).Length > 0)
-                    resultValue = IPAddress.Parse((string)value);
+
+                resultValue = IPAddress.Parse((string)value);
             }
             catch (Exception e)
             {

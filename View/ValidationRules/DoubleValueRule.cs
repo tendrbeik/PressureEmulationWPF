@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace PressureEmulationWPF.View.ValidationRules
 {
-    class DoubleValueRule:ValidationRule
+    class DoubleValueRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
@@ -12,8 +12,8 @@ namespace PressureEmulationWPF.View.ValidationRules
             {
                 if (((string)value).Length == 0)
                     return new ValidationResult(false, $"Число не может быть пустой строкой!");
-                if (((string)value).Length > 0)
-                    resultValue = double.Parse((string)value, CultureInfo.InvariantCulture);
+
+                resultValue = double.Parse((string)value, CultureInfo.InvariantCulture);
             }
             catch (Exception e)
             {

@@ -12,14 +12,14 @@ namespace PressureEmulationWPF.View.ValidationRules
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            var resultValue;
+            byte resultValue;
             try
             {
                 if (((string)value).Length == 0)
                     return new ValidationResult(false, $"SlaveID не может быть пустой строкой!");
-                if (((string)value).Length > 0)
-                    //TODO: Надо разобраться сколько SlaveID вообще может быть на одном сервере.
-                    resultValue = byte.Parse((string)value);
+
+                //TODO: Надо разобраться сколько SlaveID вообще может быть на одном сервере.
+                resultValue = byte.Parse((string)value);
             }
             catch (Exception e)
             {
