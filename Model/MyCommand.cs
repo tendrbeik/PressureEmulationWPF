@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace PressureEmulationWPF
+namespace PressureEmulationWPF.Model
 {
     internal class MyCommand:ICommand
     {

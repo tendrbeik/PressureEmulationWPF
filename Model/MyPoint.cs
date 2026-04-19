@@ -1,4 +1,4 @@
-﻿namespace PressureEmulationWPF
+﻿namespace PressureEmulationWPF.Model
 {
     internal class MyPoint
     {

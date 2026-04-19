@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using PressureEmulationWPF.ViewModel;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace PressureEmulationWPF

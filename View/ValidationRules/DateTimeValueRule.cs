@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Controls;
 
-namespace PressureEmulationWPF
+namespace PressureEmulationWPF.View.ValidationRules
 {
     class DateTimeValueRule : ValidationRule
     {
