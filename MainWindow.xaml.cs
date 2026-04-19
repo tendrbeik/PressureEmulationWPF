@@ -98,5 +98,14 @@ namespace PressureEmulationWPF
                 _vm.StartCommand.Execute(null);
             }
         }
+
+        private void StartButton_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            //TODO: Сделать валидацию четырёх полей тут.
+            if (_vm?.StartCommand?.CanExecute(null) == true)
+            {
+                _vm.StartCommand.Execute(null);
+            }
+        }
     }
 }

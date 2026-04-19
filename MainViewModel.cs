@@ -1,16 +1,17 @@
-﻿using LiveChartsCore;
+﻿using FluentModbus;
+using LiteDB;
+using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
-using LiteDB;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.IO;
+using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
-using FluentModbus;
+using System.Windows.Input;
 
 namespace PressureEmulationWPF
 {
@@ -44,9 +45,13 @@ namespace PressureEmulationWPF
 
         //Описание полей для вкладки TabItem ModbusSlave
         private string _slaveIP = "127.0.0.1";
-        private string _slavePort = "502";
-        private string _slaveID = "1";
+        private int _slavePort = 502;
+        private byte _slaveID = 1;
+        private int _inputRegisterAddress = 0;
         private ModbusTcpClient _client = new ModbusTcpClient();
+
+        private readonly ObservableCollection<ObservablePoint> _lastValuesMS = new ObservableCollection<ObservablePoint>();
+        private readonly ObservableCollection<ObservablePoint> _allValuesMS = new ObservableCollection<ObservablePoint>();
 
         //Описание Action<string> делегата для вывода сообщений об ошибках на форму
         private readonly Action<string> _showError;
@@ -157,7 +162,7 @@ namespace PressureEmulationWPF
         }
         public ICommand SaveEmulationCommand { get; }
 
-        //Описание геттеров и сеттеров для вкладки TabItem WatchSavedEmulation
+        //Описание геттеров и сеттеров для вкладки TabItem WatchSavedEmulationTab
         public ObservableCollection<EmulationData> Emulations
         {
             get => _emulations;
@@ -190,7 +195,7 @@ namespace PressureEmulationWPF
         public List<Axis> XAxesWSE { get; set; }
         public List<Axis> YAxesWSE { get; set; }
 
-        //Описание геттеров и сеттеров для вкладки TabItem ModbusSlave
+        //Описание геттеров и сеттеров для вкладки TabItem ModbusSlaveTab (сокращённо MS)
         public string SlaveIP
         {
             get => _slaveIP;
@@ -200,8 +205,7 @@ namespace PressureEmulationWPF
                 OnPropertyChanged("SlaveIP");
             }
         }
-
-        public string SlavePort
+        public int SlavePort
         {
             get => _slavePort;
             set
@@ -210,18 +214,34 @@ namespace PressureEmulationWPF
                 OnPropertyChanged("SlavePort");
             }
         }
-
-        public string SlaveID
+        public byte SlaveID
         {
             get => _slaveID;
             set
             {
-                _slaveIP = value;
+                _slaveID = value;
                 OnPropertyChanged("SlaveID");
             }
         }
+        private int InputRegisterAddress
+        {
+            get => _inputRegisterAddress;
+            set
+            {
+                _inputRegisterAddress = value;
+                OnPropertyChanged("InputRegisterAddress");
+            }
+        }
+        public ICommand ConnectToSlaveCommand { get; }
+        private CancellationTokenSource _ctsMS;
+        public ObservableCollection<ISeries> SeriesMS
+        {
+            get;
+            set;
+        }
+        public List<Axis> XAxesMS { get; set; }
+        public List<Axis> YAxesMS { get; set; }
         #endregion
-
 
         public MainViewModel(Action<string> showError)
         {
@@ -337,6 +357,53 @@ namespace PressureEmulationWPF
 
             //инициализируем делегат
             _showError = showError;
+
+            //Прописываем инициализацию свойств для вкладки ModbusSlaveTab
+            SeriesMS = [
+                new LineSeries<ObservablePoint>
+            {
+                Values = _lastValuesMS,
+                Fill = null,
+                GeometryFill = null,
+                GeometryStroke = null,
+                LineSmoothness = 0
+            }
+            ];
+
+            XAxesMS = new List<Axis>{
+                new Axis()
+                {
+                    Name = "Время (секунды)",
+                    NamePaint = new SolidColorPaint(SKColors.Black),
+
+                    LabelsPaint = new SolidColorPaint(SKColors.Blue),
+                    TextSize = 10,
+
+                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray) { StrokeThickness = 2 },
+                    CustomSeparators = GetSeparators(0, 10, 1000)
+                }
+            };
+
+            YAxesMS = new List<Axis>{
+                new Axis()
+                {
+                    Name = "Давление (условные единицы)",
+                    NamePaint = new SolidColorPaint(SKColors.Black),
+
+                    LabelsPaint = new SolidColorPaint(SKColors.Blue),
+                    TextSize = 10,
+
+                    SeparatorsPaint = new SolidColorPaint(SKColors.LightSlateGray) { StrokeThickness = 2 }
+                }
+            };
+
+            ConnectToSlaveCommand = new MyCommand(_ =>
+            {
+                _ctsMS?.Cancel();
+                _ctsMS = new CancellationTokenSource();
+                ConnectToSlave();
+                _ = ModbusSlavePressure(_ctsMS.Token, 10, 100);
+            });
         }
 
 
@@ -512,6 +579,17 @@ namespace PressureEmulationWPF
         }
         #endregion
 
+        //TODO: Надо подумать нужен ли вообще этот регион и если да, то как его назвать.
+        #region OnPropertyChanged-метод и событие
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName] string prop = "")
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(prop));
+        }
+        #endregion
+
+        #region Прочие методы
         private void DrawChart(ObservableCollection<ObservablePoint> values)
         {
             if (values == null) return;
@@ -580,11 +658,42 @@ namespace PressureEmulationWPF
             return seps;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged([CallerMemberName] string prop = "")
+        private void ConnectToSlave()
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(prop));
+            _client.Connect(new IPEndPoint(IPAddress.Parse(_slaveIP), _slavePort),ModbusEndianness.BigEndian);
         }
+
+        private async Task ModbusSlavePressure(CancellationToken token, int lastSecondsAmount, int delay)
+        {
+            // to keep this sample simple, we run the next infinite loop 
+            // in a real application you should stop the loop/task when the view is disposed 
+            _lastValuesMS.Clear();
+            _allValuesMS.Clear();
+            double emulationTime = 0;
+
+
+            while (!token.IsCancellationRequested)
+            {
+                // Because we are updating the chart from a different thread 
+                // we need to use a lock to access the chart data. 
+                // this is not necessary if your changes are made on the UI thread. 
+                //lock (Sync)
+                //{
+                var value = _client.ReadInputRegisters<double>(_slaveID, _inputRegisterAddress, 1);
+                _values.Add(new ObservablePoint(emulationTime, (double)value[0]));
+                _valuesForDB.Add(new ObservablePoint(emulationTime, (double)value[0]));
+
+
+                if (_values.Count > lastSecondsAmount * 1000 / delay) _values.RemoveAt(0);
+
+                // we need to update the separators every time we add a new point 
+                XAxes[0].CustomSeparators = GetSeparators(emulationTime, lastSecondsAmount, delay);
+                emulationTime += delay / 1000;
+                //}
+                await Task.Delay(delay);
+            }
+        }
+        #endregion
+
     }
 }

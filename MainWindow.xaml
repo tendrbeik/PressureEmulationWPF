@@ -269,7 +269,7 @@
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
                         Validation.Error="PositiveDoubleParse_Error" Height="20">
-                        <Binding Path="EmulationName"
+                        <Binding Path="SlaveIP"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
                                 <local:EmulationNameRule/>
@@ -285,7 +285,7 @@
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
                         Validation.Error="PositiveDoubleParse_Error" Height="20">
-                        <Binding Path="EmulationName"
+                        <Binding Path="SlavePort"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
                                 <local:EmulationNameRule/>
@@ -301,7 +301,7 @@
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
                         Validation.Error="PositiveDoubleParse_Error" Height="20">
-                        <Binding Path="EmulationName"
+                        <Binding Path="SlaveID"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
                                 <local:EmulationNameRule/>
@@ -312,9 +312,9 @@
                     <Label Content="Port" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="155" FontSize="12"/>
                     <Label Content="SlaveID" HorizontalAlignment="Left" Margin="10,120,0,0" VerticalAlignment="Top" Width="155" FontSize="12"/>
                     <lvc:CartesianChart
-                        Series="{Binding Series}"
-                        XAxes="{Binding XAxes}"
-                        YAxes="{Binding YAxes}"
+                        Series="{Binding SeriesMS}"
+                        XAxes="{Binding XAxesMS}"
+                        YAxes="{Binding YAxesMS}"
                         x:Name="MSChart" 
                         Margin="185,10,10,252" 
                         Background="White" 
@@ -323,9 +323,26 @@
                         x:Name="StartButton_Copy" 
                         Content="Подключиться" 
                         HorizontalAlignment="Left" 
-                        Margin="10,175,0,0" 
+                        Margin="10,252,0,0" 
                         VerticalAlignment="Top" 
-                        Height="30" Width="120"/>
+                        Height="30" Width="120" Click="StartButton_Copy_Click"/>
+                    <TextBox 
+                        x:Name="InputRegisterAddress" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,227,0,0" 
+                        TextWrapping="Wrap" 
+                        VerticalAlignment="Top" 
+                        Width="147"
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        <Binding Path="InputRegisterAddress"
+                            NotifyOnValidationError="True">
+                            <Binding.ValidationRules>
+                                <local:EmulationNameRule/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,175,0,0" TextWrapping="Wrap" Text="Адрес Input регистра, откуда брать значения (double) для графика" VerticalAlignment="Top" Height="47" Width="147" FontSize="12"/>
                 </Grid>
             </TabItem>
         </TabControl>
