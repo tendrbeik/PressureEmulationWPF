@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace PressureEmulationWPF.View.ValidationRules
+namespace PressureEmulationWPF.View
 {
     internal class IPRule : ValidationRule
     {

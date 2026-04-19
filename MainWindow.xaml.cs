@@ -100,8 +100,18 @@ namespace PressureEmulationWPF
             }
         }
 
-        private void StartButton_Copy_Click(object sender, RoutedEventArgs e)
+        private void MSStartButton_Click(object sender, RoutedEventArgs e)
         {
+            var errors = Validation.GetHasError(SlaveIP) ||
+                Validation.GetHasError(SlavePort) ||
+                Validation.GetHasError(SlaveID) ||
+                Validation.GetHasError(InputRegisterAddress);
+
+            if (errors)
+            {
+                MessageBox.Show("Исправьте ошибки в полях ввода имени эмуляции и её даты");
+                return;
+            }
             //TODO: Сделать валидацию четырёх полей тут.
             if (_vm?.StartCommand?.CanExecute(null) == true)
             {

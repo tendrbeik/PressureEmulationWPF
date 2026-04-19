@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Controls;
 
-namespace PressureEmulationWPF.View.ValidationRules
+namespace PressureEmulationWPF.View
 {
     class DoubleValueRule : ValidationRule
     {

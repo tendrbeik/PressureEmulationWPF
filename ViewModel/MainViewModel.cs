@@ -224,7 +224,7 @@ namespace PressureEmulationWPF.ViewModel
                 OnPropertyChanged("SlaveID");
             }
         }
-        private int InputRegisterAddress
+        public int InputRegisterAddress
         {
             get => _inputRegisterAddress;
             set

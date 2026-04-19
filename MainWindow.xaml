@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PressureEmulationWPF"
-        xmlns:rules="clr-namespace:PressureEmulationWPF.View.ValidationRules"
+        xmlns:rules="clr-namespace:PressureEmulationWPF.View"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="550" Width="800">
@@ -273,7 +273,7 @@
                         <Binding Path="SlaveIP"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <rules:EmulationNameRule/>
+                                <rules:SlaveIDRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
@@ -289,7 +289,7 @@
                         <Binding Path="SlavePort"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <rules:EmulationNameRule/>
+                                <rules:PortRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
@@ -305,7 +305,7 @@
                         <Binding Path="SlaveID"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <rules:EmulationNameRule/>
+                                <rules:SlaveIDRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
@@ -321,12 +321,12 @@
                         Background="White" 
                         BorderBrush="Black"/>
                     <Button 
-                        x:Name="StartButton_Copy" 
+                        x:Name="MSStartButton" 
                         Content="Подключиться" 
                         HorizontalAlignment="Left" 
                         Margin="10,252,0,0" 
                         VerticalAlignment="Top" 
-                        Height="30" Width="120" Click="StartButton_Copy_Click"/>
+                        Height="30" Width="120" Click="MSStartButton_Click"/>
                     <TextBox 
                         x:Name="InputRegisterAddress" 
                         HorizontalAlignment="Left" 
@@ -339,7 +339,7 @@
                         <Binding Path="InputRegisterAddress"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <rules:EmulationNameRule/>
+                                <rules:InputRegisterAddressRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
