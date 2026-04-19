@@ -273,7 +273,7 @@
                         <Binding Path="SlaveIP"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <rules:SlaveIDRule/>
+                                <rules:IPRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>

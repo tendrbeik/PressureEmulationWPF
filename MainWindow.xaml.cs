@@ -109,13 +109,13 @@ namespace PressureEmulationWPF
 
             if (errors)
             {
-                MessageBox.Show("Исправьте ошибки в полях ввода имени эмуляции и её даты");
+                MessageBox.Show("Исправьте ошибки в полях ввода для подключения к Modbus Slave");
                 return;
             }
             //TODO: Сделать валидацию четырёх полей тут.
-            if (_vm?.StartCommand?.CanExecute(null) == true)
+            if (_vm?.ConnectToSlaveCommand?.CanExecute(null) == true)
             {
-                _vm.StartCommand.Execute(null);
+                _vm.ConnectToSlaveCommand.Execute(null);
             }
         }
     }

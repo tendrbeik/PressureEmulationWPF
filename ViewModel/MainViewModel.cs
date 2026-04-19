@@ -34,6 +34,8 @@ namespace PressureEmulationWPF.ViewModel
         private bool _randomPressureMode = true;
         private bool _constantPressureMode = false;
         private bool _constantChangingPressureMode = false;
+        //Токен отмены. Нужен для того, чтобы "убить" асинхронную эмуляцию.
+        private CancellationTokenSource _cts;
 
         //Описание полей для вкладки TabItem SaveLastEmulationTab
         private string _emulationName = "Эмуляция";
@@ -50,15 +52,13 @@ namespace PressureEmulationWPF.ViewModel
         private byte _slaveID = 1;
         private int _inputRegisterAddress = 0;
         private ModbusTcpClient _client = new ModbusTcpClient();
+        private CancellationTokenSource _ctsMS;
 
         private readonly ObservableCollection<ObservablePoint> _lastValuesMS = new ObservableCollection<ObservablePoint>();
         private readonly ObservableCollection<ObservablePoint> _allValuesMS = new ObservableCollection<ObservablePoint>();
 
         //Описание Action<string> делегата для вывода сообщений об ошибках на форму
         private readonly Action<string> _showError;
-
-        //Токен отмены. Нужен для того, чтобы "убить" асинхронную эмуляцию.
-        private CancellationTokenSource _cts;
         #endregion
 
         #region Геттеры и сеттеры
@@ -233,8 +233,7 @@ namespace PressureEmulationWPF.ViewModel
                 OnPropertyChanged("InputRegisterAddress");
             }
         }
-        public ICommand ConnectToSlaveCommand { get; }
-        private CancellationTokenSource _ctsMS;
+        public ICommand ConnectToSlaveCommand { get; }       
         public ObservableCollection<ISeries> SeriesMS
         {
             get;
@@ -659,6 +658,17 @@ namespace PressureEmulationWPF.ViewModel
             return seps;
         }
 
+        private double[] GetSeparatorsForSeconds(double emulationTime, double lastSecondsAmount)
+        {
+            int sepsAmount = (int)(lastSecondsAmount);
+            double[] seps = new double[sepsAmount];
+            for (int i = 0; i < seps.Length; i++)
+            {
+                seps[i] = Math.Truncate(emulationTime) - i;
+            }
+            return seps;
+        }
+
         private void ConnectToSlave()
         {
             _client.Connect(new IPEndPoint(IPAddress.Parse(_slaveIP), _slavePort),ModbusEndianness.BigEndian);
@@ -670,7 +680,7 @@ namespace PressureEmulationWPF.ViewModel
             // in a real application you should stop the loop/task when the view is disposed 
             _lastValuesMS.Clear();
             _allValuesMS.Clear();
-            double emulationTime = 0;
+            double processTime = 0;
 
 
             while (!token.IsCancellationRequested)
@@ -681,15 +691,15 @@ namespace PressureEmulationWPF.ViewModel
                 //lock (Sync)
                 //{
                 var value = _client.ReadInputRegisters<double>(_slaveID, _inputRegisterAddress, 1);
-                _values.Add(new ObservablePoint(emulationTime, (double)value[0]));
-                _valuesForDB.Add(new ObservablePoint(emulationTime, (double)value[0]));
+                _lastValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
+                _allValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
 
 
-                if (_values.Count > lastSecondsAmount * 1000 / delay) _values.RemoveAt(0);
+                if (_lastValuesMS.Count > lastSecondsAmount * 1000 / delay) _lastValuesMS.RemoveAt(0);
 
                 // we need to update the separators every time we add a new point 
-                XAxes[0].CustomSeparators = GetSeparators(emulationTime, lastSecondsAmount, delay);
-                emulationTime += delay / 1000;
+                XAxesMS[0].CustomSeparators = GetSeparatorsForSeconds(processTime, lastSecondsAmount);
+                processTime += delay / 1000d;
                 //}
                 await Task.Delay(delay);
             }
