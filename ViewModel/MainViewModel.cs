@@ -8,6 +8,7 @@ using PressureEmulationWPF.Model;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -59,6 +60,18 @@ namespace PressureEmulationWPF.ViewModel
 
         //Описание Action<string> делегата для вывода сообщений об ошибках на форму
         private readonly Action<string> _showError;
+
+        private readonly List<string> _registerTypes = new List<string> {"COIL STATUS",
+            "INPUT STATUS",
+            "HOLDING REGISTER",
+            "INPUT REGISTER" };
+
+        private string _selectedRegisterType;
+
+        private int _count = 0;
+
+        private ObservableCollection<string> _valueTypes = new ObservableCollection<string>();
+
         #endregion
 
         #region Геттеры и сеттеры
@@ -233,7 +246,8 @@ namespace PressureEmulationWPF.ViewModel
                 OnPropertyChanged("InputRegisterAddress");
             }
         }
-        public ICommand ConnectToSlaveCommand { get; }       
+        public ICommand ConnectToSlaveCommand { get; }
+        public ICommand DisconnectFromSlaveCommand { get; }
         public ObservableCollection<ISeries> SeriesMS
         {
             get;
@@ -241,6 +255,19 @@ namespace PressureEmulationWPF.ViewModel
         }
         public List<Axis> XAxesMS { get; set; }
         public List<Axis> YAxesMS { get; set; }
+        public List<string> RegisterTypes { get => _registerTypes; }
+        public string SelectedRegisterType
+        {
+            get => _selectedRegisterType;
+            set
+            {
+                _selectedRegisterType = value;
+                ChangeValueTypes();
+            }
+        }
+        public int Count { get => _count; set => _count = value; }
+        public ObservableCollection<string> ValueTypes { get => _valueTypes; }
+        public string SelectedValueType { get; set; }
         #endregion
 
         public MainViewModel(Action<string> showError)
@@ -404,6 +431,12 @@ namespace PressureEmulationWPF.ViewModel
                 ConnectToSlave();
                 _ = ModbusSlavePressure(_ctsMS.Token, 10, 100);
             });
+
+            DisconnectFromSlaveCommand = new MyCommand(_ =>
+            {
+                _ctsMS?.Cancel();
+                _client.Disconnect();
+            });
         }
 
 
@@ -451,7 +484,7 @@ namespace PressureEmulationWPF.ViewModel
 
 
             while (!token.IsCancellationRequested)
-            {      
+            {
                 _values.Add(new ObservablePoint(emulationTime, constantPressureValue));
                 _valuesForDB.Add(new ObservablePoint(emulationTime, constantPressureValue));
 
@@ -671,7 +704,7 @@ namespace PressureEmulationWPF.ViewModel
 
         private void ConnectToSlave()
         {
-            _client.Connect(new IPEndPoint(IPAddress.Parse(_slaveIP), _slavePort),ModbusEndianness.BigEndian);
+            _client.Connect(new IPEndPoint(IPAddress.Parse(_slaveIP), _slavePort), ModbusEndianness.BigEndian);
         }
 
         private async Task ModbusSlavePressure(CancellationToken token, int lastSecondsAmount, int delay)
@@ -702,6 +735,27 @@ namespace PressureEmulationWPF.ViewModel
                 processTime += delay / 1000d;
                 //}
                 await Task.Delay(delay);
+            }
+        }
+
+        private void ChangeValueTypes()
+        {
+            if (_selectedRegisterType == "COIL STATUS" || _selectedRegisterType == "INPUT STATUS")
+            {
+                _valueTypes.Clear();
+                _valueTypes.Add("bool");
+                _valueTypes.Add("бит");
+            }
+            else
+            {
+                _valueTypes.Clear();
+                _valueTypes.Add("биты");
+                _valueTypes.Add("char");
+                _valueTypes.Add("short");
+                _valueTypes.Add("int");
+                _valueTypes.Add("long");
+                _valueTypes.Add("float");
+                _valueTypes.Add("double");
             }
         }
         #endregion

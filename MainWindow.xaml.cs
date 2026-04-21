@@ -118,5 +118,13 @@ namespace PressureEmulationWPF
                 _vm.ConnectToSlaveCommand.Execute(null);
             }
         }
+
+        private void MSDisconnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_vm?.DisconnectFromSlaveCommand?.CanExecute(null) == true)
+            {
+                _vm.DisconnectFromSlaveCommand.Execute(null);
+            }
+        }
     }
 }
