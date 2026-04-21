@@ -321,12 +321,12 @@
                         Background="White" 
                         BorderBrush="Black"/>
                     <Button 
-                        x:Name="MSStartButton" 
+                        x:Name="MSConnectButton" 
                         Content="Подключиться" 
                         HorizontalAlignment="Left" 
-                        Margin="10,252,0,0" 
+                        Margin="10,420,0,0" 
                         VerticalAlignment="Top" 
-                        Height="30" Width="120" Click="MSStartButton_Click"/>
+                        Height="30" Width="120" Click="MSConnectButton_Click"/>
                     <TextBox 
                         x:Name="InputRegisterAddress" 
                         HorizontalAlignment="Left" 
@@ -344,9 +344,54 @@
                         </Binding>
                     </TextBox>
                     <TextBlock HorizontalAlignment="Left" Margin="10,175,0,0" TextWrapping="Wrap" Text="Адрес Input регистра, откуда брать значения (double) для графика" VerticalAlignment="Top" Height="47" Width="147" FontSize="12"/>
+                    <ComboBox x:Name="RegistersType" HorizontalAlignment="Left" Margin="10,282,0,0" VerticalAlignment="Top" Width="147">
+                        <ComboBoxItem Content="Coil Status"/>
+                        <ComboBoxItem Content="Input Status"/>
+                    </ComboBox>
+                    <ComboBox x:Name="ValuesType" HorizontalAlignment="Left" Margin="10,340,0,0" VerticalAlignment="Top" Width="147">
+                        <ComboBoxItem Content="Coil Status"/>
+                        <ComboBoxItem Content="Input Status"/>
+                    </ComboBox>
+                    <TextBox 
+                        x:Name="Count" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,395,0,0" 
+                        TextWrapping="Wrap" 
+                        VerticalAlignment="Top" 
+                        Width="147"
+                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
+                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        <Binding Path="SlaveID"
+                            NotifyOnValidationError="True">
+                            <Binding.ValidationRules>
+                                <rules:SlaveIDRule/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox>
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="237" Width="599">
+                        <DataGrid
+                            ItemsSource="{Binding Emulations}"
+                            AutoGenerateColumns="False"
+                            SelectedItem="{Binding SelectedEmulation}"
+                            SelectionMode="Single" 
+                            IsReadOnly="True" FontSize="10">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Header="Name"
+                                    Binding="{Binding Name}"/>
+                                <DataGridTextColumn 
+                                    Header="Date"
+                                    Binding="{Binding Date}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                    <Label Content="Тип регистров" HorizontalAlignment="Left" Margin="10,252,0,0" VerticalAlignment="Top" Width="155" FontSize="12"/>
+
+                    <Label Margin="10,310,0,0" Width="155" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Content="Тип переменных"/>
+                    <Label Margin="10,368,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="10" Content="Число строк для вывода"/>
+                    <Button Width="120" VerticalAlignment="Top" x:Name="MSDisconnectButton" Margin="10,455,0,0" Height="30" HorizontalAlignment="Left" Content="Отключиться"/>
                 </Grid>
             </TabItem>
         </TabControl>
-
     </Grid>
 </Window>

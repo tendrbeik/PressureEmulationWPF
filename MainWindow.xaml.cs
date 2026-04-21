@@ -100,7 +100,7 @@ namespace PressureEmulationWPF
             }
         }
 
-        private void MSStartButton_Click(object sender, RoutedEventArgs e)
+        private void MSConnectButton_Click(object sender, RoutedEventArgs e)
         {
             var errors = Validation.GetHasError(SlaveIP) ||
                 Validation.GetHasError(SlavePort) ||
