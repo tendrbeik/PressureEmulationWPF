@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace PressureEmulationWPF.Model
 {
-    internal class RegisterData<T>
+    internal class RegisterData
     {
         public string? Address  { get; set; }
-        public T? RegisterValue { get; set; }
+        public string? RegisterValue { get; set; }
     }
 }

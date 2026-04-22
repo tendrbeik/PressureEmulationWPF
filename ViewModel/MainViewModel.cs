@@ -58,20 +58,18 @@ namespace PressureEmulationWPF.ViewModel
         private readonly ObservableCollection<ObservablePoint> _lastValuesMS = new ObservableCollection<ObservablePoint>();
         private readonly ObservableCollection<ObservablePoint> _allValuesMS = new ObservableCollection<ObservablePoint>();
 
-        //Описание Action<string> делегата для вывода сообщений об ошибках на форму
-        private readonly Action<string> _showError;
-
         private readonly List<string> _registerTypes = new List<string> {"COIL STATUS",
             "INPUT STATUS",
             "HOLDING REGISTER",
             "INPUT REGISTER" };
 
-        private string _selectedRegisterType;
-
-        private int _count = 0;
-
-        private ObservableCollection<string> _valueTypes = new ObservableCollection<string>();
-
+        private string _selectedRegisterType = "COIL STATUS";
+        private int _count = 10;
+        private ObservableCollection<string> _valueTypes = new ObservableCollection<string>() { "bool", "двоичный код" };
+        private string _selectedValueType = "двоичный код";
+        private ObservableCollection<RegisterData> _msRegisterValues = new ObservableCollection<RegisterData>();
+        //Описание Action<string> делегата для вывода сообщений об ошибках на форму
+        private readonly Action<string> _showError;
         #endregion
 
         #region Геттеры и сеттеры
@@ -267,7 +265,16 @@ namespace PressureEmulationWPF.ViewModel
         }
         public int Count { get => _count; set => _count = value; }
         public ObservableCollection<string> ValueTypes { get => _valueTypes; }
-        public string SelectedValueType { get; set; }
+        public string SelectedValueType
+        {
+            get => _selectedValueType;
+            set
+            {
+                _selectedValueType = value;
+                OnPropertyChanged("SelectedValueType");
+            }
+        }
+        public ObservableCollection<RegisterData> MSRegisterValues { get => _msRegisterValues; }
         #endregion
 
         public MainViewModel(Action<string> showError)
@@ -429,7 +436,7 @@ namespace PressureEmulationWPF.ViewModel
                 _ctsMS?.Cancel();
                 _ctsMS = new CancellationTokenSource();
                 ConnectToSlave();
-                _ = ModbusSlavePressure(_ctsMS.Token, 10, 100);
+                _ = ModbusSlaveWatch(_ctsMS.Token, 10, 500);
             });
 
             DisconnectFromSlaveCommand = new MyCommand(_ =>
@@ -707,35 +714,349 @@ namespace PressureEmulationWPF.ViewModel
             _client.Connect(new IPEndPoint(IPAddress.Parse(_slaveIP), _slavePort), ModbusEndianness.BigEndian);
         }
 
-        private async Task ModbusSlavePressure(CancellationToken token, int lastSecondsAmount, int delay)
+        private async Task ModbusSlaveWatch(CancellationToken token, int lastSecondsAmount, int delay)
         {
-            // to keep this sample simple, we run the next infinite loop 
-            // in a real application you should stop the loop/task when the view is disposed 
             _lastValuesMS.Clear();
             _allValuesMS.Clear();
             double processTime = 0;
 
-
             while (!token.IsCancellationRequested)
             {
-                // Because we are updating the chart from a different thread 
-                // we need to use a lock to access the chart data. 
-                // this is not necessary if your changes are made on the UI thread. 
-                //lock (Sync)
-                //{
-                var value = _client.ReadInputRegisters<double>(_slaveID, _inputRegisterAddress, 1);
-                _lastValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
-                _allValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
-
-
-                if (_lastValuesMS.Count > lastSecondsAmount * 1000 / delay) _lastValuesMS.RemoveAt(0);
-
-                // we need to update the separators every time we add a new point 
-                XAxesMS[0].CustomSeparators = GetSeparatorsForSeconds(processTime, lastSecondsAmount);
+                DrawMSChart(processTime, lastSecondsAmount, delay);
+                ReadRegisters();
                 processTime += delay / 1000d;
-                //}
                 await Task.Delay(delay);
             }
+        }
+
+        private void DrawMSChart(double processTime, int lastSecondsAmount, int delay)
+        {
+            var value = _client.ReadInputRegisters<double>(_slaveID, _inputRegisterAddress, 1);
+            _lastValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
+            _allValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
+
+
+            if (_lastValuesMS.Count > lastSecondsAmount * 1000 / delay) _lastValuesMS.RemoveAt(0);
+
+            XAxesMS[0].CustomSeparators = GetSeparatorsForSeconds(processTime, lastSecondsAmount);
+        }
+
+        private void ReadRegisters()
+        {
+            switch (_selectedRegisterType)
+            {
+                case "COIL STATUS":
+                    {
+                        var data = _client.ReadCoils(_slaveID, 0, _count);
+                        _msRegisterValues.Clear();
+                        string value1;
+                        string value2;
+                        switch (SelectedValueType)
+                        {
+                            case "bool":
+                                {
+                                    value1 = "true";
+                                    value2 = "false";
+                                    break;
+                                }
+                            case "двоичный код":
+                                {
+                                    value1 = "1";
+                                    value2 = "0";
+                                    break;
+                                }
+                            //Пропишу дефолт на всякий случай.
+                            //TODO: надо подумать над тем, что я буду выводить по умолчанию ошибку или двоичный код
+                            default:
+                                {
+                                    value1 = "1";
+                                    value2 = "0";
+                                    break;
+                                }
+                        }
+                        for (int i = 0; i < _count; i++)
+                        {
+                            int byteIndex = i / 8;
+                            int bitPosition = i % 8;
+                            RegisterData rd = new RegisterData();
+                            rd.Address = "0" + i.ToString().PadLeft(5, '0');
+                            rd.RegisterValue = (((data[byteIndex] >> bitPosition) & 1) > 0) ? value1 : value2;
+                            _msRegisterValues.Add(rd);
+                        }
+                        break;
+                    }
+                case "INPUT STATUS":
+                    {
+                        var data = _client.ReadDiscreteInputs(_slaveID, 0, _count);
+                        _msRegisterValues.Clear();
+                        string value1;
+                        string value2;
+                        switch (SelectedValueType)
+                        {
+                            case "bool":
+                                {
+                                    value1 = "true";
+                                    value2 = "false";
+                                    break;
+                                }
+                            case "двоичный код":
+                                {
+                                    value1 = "1";
+                                    value2 = "0";
+                                    break;
+                                }
+                            //Пропишу дефолт на всякий случай.
+                            //TODO: надо подумать над тем, что я буду выводить по умолчанию ошибку или двоичный код
+                            default:
+                                {
+                                    value1 = "1";
+                                    value2 = "0";
+                                    break;
+                                }
+                        }
+                        for (int i = 0; i < _count; i++)
+                        {
+                            int byteIndex = i / 8;
+                            int bitPosition = i % 8;
+                            RegisterData rd = new RegisterData();
+                            rd.Address = "1" + i.ToString().PadLeft(5, '0');
+                            rd.RegisterValue = (((data[byteIndex] >> bitPosition) & 1) > 0) ? value1 : value2;
+                            _msRegisterValues.Add(rd);
+                        }
+                        break;
+                    }
+                case "HOLDING REGISTER":
+                    {
+                        switch (SelectedValueType)
+                        {
+                            case "двоичный код":
+                                {
+                                    var data = _client.ReadHoldingRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + i.ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = Convert.ToString(data[i], 2).PadLeft(16, '0');
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "char":
+                                {
+                                    var data = _client.ReadHoldingRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + i.ToString().PadLeft(5, '0');
+                                        //Разобъём ushort на два байта и потом преобразуем их в char символы.
+                                        //TODO: Надо подумать над тем какой байт старший, а какой младший. Хотя тут всё зависит от слейва на деле.
+                                        byte[] bytes = BitConverter.GetBytes(data[i]);
+                                        rd.RegisterValue = ((char)bytes[1]).ToString() + ((char)bytes[0]).ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "short":
+                                {
+                                    var data = _client.ReadHoldingRegisters<short>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + i.ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "int":
+                                {
+                                    var data = _client.ReadHoldingRegisters<int>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + (i * 2).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "long":
+                                {
+                                    var data = _client.ReadHoldingRegisters<long>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + (i * 4).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "float":
+                                {
+                                    var data = _client.ReadHoldingRegisters<float>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + (i * 2).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "double":
+                                {
+                                    var data = _client.ReadHoldingRegisters<double>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + (i * 4).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            //TODO: надо подумать над тем, что я буду выводить по умолчанию ошибку или двоичный код
+                            default:
+                                {
+                                    var data = _client.ReadHoldingRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "4" + i.ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = Convert.ToString(data[i], 2).PadLeft(16, '0');
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                        }
+                        break;
+                    }
+                case "INPUT REGISTER":
+                    {
+                        switch (SelectedValueType)
+                        {
+                            case "двоичный код":
+                                {
+                                    var data = _client.ReadInputRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + i.ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = Convert.ToString(data[i], 2).PadLeft(16, '0');
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "char":
+                                {
+                                    var data = _client.ReadInputRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + i.ToString().PadLeft(5, '0');
+                                        //Разобъём ushort на два байта и потом преобразуем их в char символы.
+                                        //TODO: Надо подумать над тем какой байт старший, а какой младший. Хотя тут всё зависит от слейва на деле.
+                                        byte[] bytes = BitConverter.GetBytes(data[i]);
+                                        rd.RegisterValue = ((char)bytes[1]).ToString() + ((char)bytes[0]).ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "short":
+                                {
+                                    var data = _client.ReadInputRegisters<short>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + i.ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "int":
+                                {
+                                    var data = _client.ReadInputRegisters<int>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + (i * 2).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "long":
+                                {
+                                    var data = _client.ReadInputRegisters<long>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + (i * 4).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "float":
+                                {
+                                    var data = _client.ReadInputRegisters<float>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + (i * 2).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            case "double":
+                                {
+                                    var data = _client.ReadInputRegisters<double>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + (i * 4).ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = data[i].ToString();
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                            //TODO: надо подумать над тем, что я буду выводить по умолчанию ошибку или двоичный код
+                            default:
+                                {
+                                    var data = _client.ReadInputRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    _msRegisterValues.Clear();
+                                    for (int i = 0; i < _count; i++)
+                                    {
+                                        RegisterData rd = new RegisterData();
+                                        rd.Address = "3" + i.ToString().PadLeft(5, '0');
+                                        rd.RegisterValue = Convert.ToString(data[i], 2).PadLeft(16, '0');
+                                        _msRegisterValues.Add(rd);
+                                    }
+                                    break;
+                                }
+                        }
+                    }
+                    break;
+            }
+
         }
 
         private void ChangeValueTypes()
@@ -744,18 +1065,20 @@ namespace PressureEmulationWPF.ViewModel
             {
                 _valueTypes.Clear();
                 _valueTypes.Add("bool");
-                _valueTypes.Add("бит");
+                _valueTypes.Add("двоичный код");
+                SelectedValueType = "двоичный код";
             }
             else
             {
                 _valueTypes.Clear();
-                _valueTypes.Add("биты");
+                _valueTypes.Add("двоичный код");
                 _valueTypes.Add("char");
                 _valueTypes.Add("short");
                 _valueTypes.Add("int");
                 _valueTypes.Add("long");
                 _valueTypes.Add("float");
                 _valueTypes.Add("double");
+                SelectedValueType = "двоичный код";
             }
         }
         #endregion

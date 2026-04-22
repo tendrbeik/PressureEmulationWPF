@@ -351,7 +351,7 @@
                         VerticalAlignment="Top" 
                         Width="147"
                         ItemsSource="{Binding RegisterTypes}"
-                        SelectedItem="{Binding SelectedRegisterType}">
+                        SelectedItem="{Binding SelectedRegisterType}" SelectedIndex="0">
                     </ComboBox>
                     <ComboBox 
                         x:Name="ValueTypes" 
@@ -360,7 +360,7 @@
                         VerticalAlignment="Top"                               
                         Width="147"                              
                         ItemsSource="{Binding ValueTypes}"                                
-                        SelectedItem="{Binding SelectedValueType}">
+                        SelectedItem="{Binding SelectedValueType}" SelectedIndex="0">
                     </ComboBox>
                     <TextBox 
                         x:Name="Count" 
@@ -380,18 +380,19 @@
                     </TextBox>
                     <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="237" Width="597">
                         <DataGrid
-                            ItemsSource="{Binding Emulations}"
+                            ItemsSource="{Binding MSRegisterValues}"
+                            SelectedItem="{Binding SelectedValueType}"
                             AutoGenerateColumns="False"
-                            SelectedItem="{Binding SelectedEmulation}"
                             SelectionMode="Single" 
-                            IsReadOnly="True" FontSize="10">
+                            IsReadOnly="True" 
+                            FontSize="10">
                             <DataGrid.Columns>
                                 <DataGridTextColumn
-                                    Header="Name"
-                                    Binding="{Binding Name}"/>
+                                    Header="Address"
+                                    Binding="{Binding Address}"/>
                                 <DataGridTextColumn 
-                                    Header="Date"
-                                    Binding="{Binding Date}"/>
+                                    Header="RegisterValue"
+                                    Binding="{Binding RegisterValue}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Border>
