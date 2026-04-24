@@ -837,13 +837,19 @@ namespace PressureEmulationWPF.ViewModel
             {
                 try
                 {
+                    //Замеряем время начала выполнения итерации цикла
+                    var start = DateTimeOffset.Now;
                     UpdateClientStatus();
                     DrawMSChart(processTime, lastSecondsAmount, delay, slaveID, inputRegisterAddress);
                     ReadRegisters(slaveID, count);
                     CalculateMaxMinAvgPressureValues();
 
                     processTime += delay / 1000d;
-                    await Task.Delay(delay);
+                    //Замеряем время окончания итерации цикла и вызываем await Task.Delay(delay),
+                    //так, чтобы он длился ровно delay миллисекунд
+                    var elapsedMs = (DateTimeOffset.Now - start).TotalMilliseconds;
+                    var delayMs = Math.Max(0, delay - elapsedMs);
+                    await Task.Delay((int)delayMs);
                 }
                 catch (Exception e)
                 {
