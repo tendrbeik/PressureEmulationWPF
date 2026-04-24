@@ -378,7 +378,7 @@
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,10,33" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="214" Width="597">
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,10,33" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="214" Width="531">
                         <DataGrid
                             ItemsSource="{Binding MSRegisterValues}"
                             SelectedItem="{Binding SelectedValueType}"
@@ -409,6 +409,36 @@
                             <TextBlock Text="{Binding StatusText}"/>
                         </StatusBarItem>
                     </StatusBar>
+                    <Label Margin="187,320,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Макс. давление"/>
+                    <Label Margin="187,380,0,0" Width="160" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Среднее. давление"/>
+                    <Label Margin="187,440,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Мин. давление"/>
+                    <TextBlock 
+                        x:Name="MSMaxPressure" 
+                        HorizontalAlignment="Left" 
+                        Margin="187,352,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding MSMaxPressure}" 
+                        VerticalAlignment="Top" 
+                        Width="160" 
+                        Height="23"/>
+                    <TextBlock 
+                        x:Name="MSAveragePressure" 
+                        HorizontalAlignment="Left" 
+                        Margin="187,412,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding MSAveragePressure}" 
+                        VerticalAlignment="Top" 
+                        Width="160" 
+                        Height="23"/>
+                    <TextBlock 
+                        x:Name="MSMinPressure" 
+                        HorizontalAlignment="Left" 
+                        Margin="187,472,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding MSMinPressure}" 
+                        VerticalAlignment="Top" 
+                        Width="160" 
+                        Height="23"/>
                 </Grid>
             </TabItem>
         </TabControl>

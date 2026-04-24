@@ -74,6 +74,9 @@ namespace PressureEmulationWPF.ViewModel
         private bool _isWatching = false;
         private bool _isTimeout = false;
         private double _countDown;
+        private double? _msMaxPressure;
+        private double? _msAveragePressure;
+        private double? _msMinPressure;
         //Описание Action<string> делегата для вывода сообщений об ошибках на форму
         private readonly Action<string> _showError;
         #endregion
@@ -288,6 +291,33 @@ namespace PressureEmulationWPF.ViewModel
             {
                 _statusText = value;
                 OnPropertyChanged("StatusText");
+            }
+        }
+        public double? MSMaxPressure
+        {
+            get => _msMaxPressure;
+            set
+            {
+                _msMaxPressure = value;
+                OnPropertyChanged("MSMaxPressure");
+            }
+        }
+        public double? MSAveragePressure
+        {
+            get => _msAveragePressure;
+            set
+            {
+                _msAveragePressure = value;
+                OnPropertyChanged("MSAveragePressure");
+            }
+        }
+        public double? MSMinPressure
+        {
+            get => _msMinPressure;
+            set
+            {
+                _msMinPressure = value;
+                OnPropertyChanged("MSMinPressure");
             }
         }
         #endregion
@@ -745,7 +775,7 @@ namespace PressureEmulationWPF.ViewModel
         {
             while (_countDown > 0)
             {
-                
+
                 try
                 {
                     ConnectToSlave(slaveIP, slavePort, isBigEndian);
@@ -765,7 +795,7 @@ namespace PressureEmulationWPF.ViewModel
 
                     UpdateClientStatus();
                     _countDown -= _client.ConnectTimeout / 1000d;
-                });                
+                });
             }
 
             _isTimeout = true;
@@ -800,6 +830,7 @@ namespace PressureEmulationWPF.ViewModel
                     UpdateClientStatus();
                     DrawMSChart(processTime, lastSecondsAmount, delay);
                     ReadRegisters();
+                    CalculateMaxMinAvgPressureValues();
 
                     processTime += delay / 1000d;
                     await Task.Delay(delay);
@@ -1159,6 +1190,13 @@ namespace PressureEmulationWPF.ViewModel
                 else
                     StatusText = $"TIMEOUT: Попытка переподключиться не удалась.";
             }
+        }
+
+        private void CalculateMaxMinAvgPressureValues()
+        {
+            MSMaxPressure = Math.Round((double)_allValuesMS.Max(x=>x.Y), 10);
+            MSAveragePressure = Math.Round((double)_allValuesMS.Average(x=>x.Y), 10);
+            MSMinPressure = Math.Round((double)_allValuesMS.Min(x=>x.Y), 10);
         }
 
         private void ChangeValueTypes()
