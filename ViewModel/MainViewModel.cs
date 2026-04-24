@@ -77,6 +77,7 @@ namespace PressureEmulationWPF.ViewModel
         private double? _msMaxPressure;
         private double? _msAveragePressure;
         private double? _msMinPressure;
+        private bool _isBigEndian = true;
         //Описание Action<string> делегата для вывода сообщений об ошибках на форму
         private readonly Action<string> _showError;
         #endregion
@@ -320,6 +321,15 @@ namespace PressureEmulationWPF.ViewModel
                 OnPropertyChanged("MSMinPressure");
             }
         }
+        public bool IsBigEndian
+        {
+            get => _isBigEndian;
+            set
+            {
+                _isBigEndian = value;
+                //OnPropertyChanged("IsBigEndian");
+            }
+        }
         #endregion
 
         public MainViewModel(Action<string> showError)
@@ -484,7 +494,7 @@ namespace PressureEmulationWPF.ViewModel
                 _ctsMS?.Cancel();
                 _ctsMS = new CancellationTokenSource();
                 //ConnectToSlave(_slaveIP, _slavePort, true);
-                _ = ModbusSlaveWatch(_ctsMS.Token, 10, 500, _slaveIP, _slavePort, true);
+                _ = ModbusSlaveWatch(_ctsMS.Token, 10, 500, _slaveIP, _slavePort, _isBigEndian);
             });
 
             DisconnectFromSlaveCommand = new MyCommand(_ =>

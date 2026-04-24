@@ -324,7 +324,7 @@
                         x:Name="MSConnectButton" 
                         Content="Подключиться" 
                         HorizontalAlignment="Left" 
-                        Margin="10,420,0,0" 
+                        Margin="10,458,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="120" Click="MSConnectButton_Click"/>
                     <TextBox 
@@ -400,7 +400,7 @@
 
                     <Label Margin="10,310,0,0" Width="155" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Content="Тип переменных"/>
                     <Label Margin="10,368,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="10" Content="Число строк для вывода"/>
-                    <Button Width="120" VerticalAlignment="Top" x:Name="MSDisconnectButton" Margin="10,455,0,0" Height="30" HorizontalAlignment="Left" Content="Отключиться" Click="MSDisconnectButton_Click"/>
+                    <Button Width="120" VerticalAlignment="Top" x:Name="MSDisconnectButton" Margin="10,493,0,0" Height="30" HorizontalAlignment="Left" Content="Отключиться" Click="MSDisconnectButton_Click"/>
                     <StatusBar FontFamily="Verdana" FontSize="14" Height="28" VerticalAlignment="Bottom">
                         <StatusBarItem>
                             <TextBlock Text="Статус подключения -"/>
@@ -439,6 +439,12 @@
                         VerticalAlignment="Top" 
                         Width="160" 
                         Height="23"/>
+                    <CheckBox 
+                        IsChecked="{Binding IsBigEndian}"
+                        Content="IsBigEndian?" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,427,0,0" 
+                        VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
         </TabControl>
