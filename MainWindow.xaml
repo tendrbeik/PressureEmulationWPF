@@ -7,7 +7,7 @@
         xmlns:rules="clr-namespace:PressureEmulationWPF.View"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="601" Width="899">
+        Title="MainWindow" Height="647" Width="899">
 
     <Window.Resources>
         <ControlTemplate x:Key="validationTemplate">
@@ -66,7 +66,7 @@
                         FontFamily="Verdana" 
                         FontSize="14" 
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error"
+                        Validation.Error="ShowErrorMessage"
                         AutomationProperties.HelpText="Верхний предел давления задаётся числом с плавающей точкой. Пример - &quot;19.3&quot;." Height="20">
                         <TextBox.Text>
                             <Binding Path="UpperPressureLimit" 
@@ -112,7 +112,7 @@
                         VerticalAlignment="Top" 
                         Width="120"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20">
                         <TextBox.Text>
                             <Binding Path="ConstantPressureValue"
                                      NotifyOnValidationError="True">
@@ -130,7 +130,7 @@
                         VerticalAlignment="Top" 
                         Width="120"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20">
                         <TextBox.Text>
                             <Binding Path="PressureDelta"
                                      NotifyOnValidationError="True">
@@ -159,7 +159,7 @@
                         VerticalAlignment="Top" 
                         Width="120"    
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20">
                         <TextBox.Text>
                             <Binding Path="StartPressureValue"
                                      NotifyOnValidationError="True">
@@ -191,7 +191,7 @@
                         VerticalAlignment="Top" 
                         Width="205"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20">
                         <TextBox.Text>
                             <Binding Path="EmulationName"
                                      NotifyOnValidationError="True">
@@ -209,7 +209,7 @@
                         VerticalAlignment="Top" 
                         Width="205"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20">
                         <TextBox.Text>
                             <Binding Path="EmulationDate" NotifyOnValidationError="True">
                                 <Binding.ValidationRules>
@@ -261,6 +261,15 @@
             </TabItem>
             <TabItem x:Name="ModbusSlaveTab" HorizontalAlignment="Center" Height="21" Header="Modbus slave" VerticalAlignment="Top" Width="108" FontFamily="Verdana" FontSize="14" Margin="0,-1,0,0">
                 <Grid Background="#FFE5E5E5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1.5*"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
                     <TextBox 
                         x:Name="SlaveIP" 
                         HorizontalAlignment="Left" 
@@ -269,7 +278,7 @@
                         VerticalAlignment="Top" 
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20" Grid.RowSpan="2">
                         <Binding Path="SlaveIP"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
@@ -285,7 +294,7 @@
                         VerticalAlignment="Top" 
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20" Grid.RowSpan="2">
                         <Binding Path="SlavePort"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
@@ -301,7 +310,7 @@
                         VerticalAlignment="Top" 
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20" Grid.RowSpan="2">
                         <Binding Path="SlaveID"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
@@ -309,24 +318,24 @@
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
-                    <Label Content="IP" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="155" FontSize="12"/>
-                    <Label Content="Port" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="155" FontSize="12"/>
-                    <Label Content="SlaveID" HorizontalAlignment="Left" Margin="10,120,0,0" VerticalAlignment="Top" Width="155" FontSize="12"/>
+                    <Label Content="IP" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="155" FontSize="12" Grid.RowSpan="2"/>
+                    <Label Content="Port" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="155" FontSize="12" Grid.RowSpan="2"/>
+                    <Label Content="SlaveID" HorizontalAlignment="Left" Margin="10,120,0,0" VerticalAlignment="Top" Width="155" FontSize="12" Grid.RowSpan="2"/>
                     <lvc:CartesianChart
                         Series="{Binding SeriesMS}"
                         XAxes="{Binding XAxesMS}"
                         YAxes="{Binding YAxesMS}"
                         x:Name="MSChart" 
-                        Margin="187,10,10,252" 
+                        Margin="10,10,10,10" 
                         Background="White" 
-                        BorderBrush="Black"/>
+                        BorderBrush="Black" Grid.Column="1" Grid.ColumnSpan="2"/>
                     <Button 
                         x:Name="MSConnectButton" 
                         Content="Подключиться" 
                         HorizontalAlignment="Left" 
                         Margin="10,458,0,0" 
                         VerticalAlignment="Top" 
-                        Height="30" Width="120" Click="MSConnectButton_Click"/>
+                        Height="30" Width="120" Click="MSConnectButton_Click" Grid.RowSpan="2"/>
                     <TextBox 
                         x:Name="InputRegisterAddress" 
                         HorizontalAlignment="Left" 
@@ -335,7 +344,7 @@
                         VerticalAlignment="Top" 
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20" Grid.RowSpan="2">
                         <Binding Path="InputRegisterAddress"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
@@ -343,7 +352,7 @@
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
-                    <TextBlock HorizontalAlignment="Left" Margin="10,175,0,0" TextWrapping="Wrap" Text="Адрес Input регистра, откуда брать значения (double) для графика" VerticalAlignment="Top" Height="47" Width="147" FontSize="12"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,175,0,0" TextWrapping="Wrap" Text="Адрес Input регистра, откуда брать значения (double) для графика" VerticalAlignment="Top" Height="47" Width="147" FontSize="12" Grid.RowSpan="2"/>
                     <ComboBox 
                         x:Name="RegisterTypes" 
                         HorizontalAlignment="Left" 
@@ -351,7 +360,7 @@
                         VerticalAlignment="Top" 
                         Width="147"
                         ItemsSource="{Binding RegisterTypes}"
-                        SelectedItem="{Binding SelectedRegisterType}" SelectedIndex="0">
+                        SelectedItem="{Binding SelectedRegisterType}" SelectedIndex="0" Grid.RowSpan="2">
                     </ComboBox>
                     <ComboBox 
                         x:Name="ValueTypes" 
@@ -360,7 +369,7 @@
                         VerticalAlignment="Top"                               
                         Width="147"                              
                         ItemsSource="{Binding ValueTypes}"                                
-                        SelectedItem="{Binding SelectedValueType}" SelectedIndex="0">
+                        SelectedItem="{Binding SelectedValueType}" SelectedIndex="0" Grid.RowSpan="2">
                     </ComboBox>
                     <TextBox 
                         x:Name="Count" 
@@ -370,7 +379,7 @@
                         VerticalAlignment="Top" 
                         Width="147"
                         Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="PositiveDoubleParse_Error" Height="20">
+                        Validation.Error="ShowErrorMessage" Height="20" Grid.RowSpan="2">
                         <Binding Path="Count"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
@@ -378,7 +387,7 @@
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,10,33" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="214" Width="531">
+                    <Border BorderBrush="Black" BorderThickness="1" Grid.Row="1" Grid.Column="2" Margin="10,10,10,38">
                         <DataGrid
                             ItemsSource="{Binding MSRegisterValues}"
                             AutoGenerateColumns="False"
@@ -394,12 +403,48 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </Border>
-                    <Label Content="Тип регистров" HorizontalAlignment="Left" Margin="10,252,0,0" VerticalAlignment="Top" Width="155" FontSize="12"/>
+                    <Label Content="Тип регистров" HorizontalAlignment="Left" Margin="10,252,0,0" VerticalAlignment="Top" Width="155" FontSize="12" Grid.RowSpan="2"/>
 
-                    <Label Margin="10,310,0,0" Width="155" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Content="Тип переменных"/>
-                    <Label Margin="10,368,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="10" Content="Число строк для вывода"/>
-                    <Button Width="120" VerticalAlignment="Top" x:Name="MSDisconnectButton" Margin="10,493,0,0" Height="30" HorizontalAlignment="Left" Content="Отключиться" Click="MSDisconnectButton_Click"/>
-                    <StatusBar FontFamily="Verdana" FontSize="14" Height="28" VerticalAlignment="Bottom">
+                    <Label Margin="10,310,0,0" Width="155" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Content="Тип переменных" Grid.RowSpan="2"/>
+                    <Label Margin="10,368,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="10" Content="Число строк для вывода" Grid.RowSpan="2"/>
+                    <Button Width="120" VerticalAlignment="Top" x:Name="MSDisconnectButton" Margin="10,493,0,0" Height="30" HorizontalAlignment="Left" Content="Отключиться" Click="MSDisconnectButton_Click" Grid.RowSpan="2"/>
+                    <Label Margin="10,10,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Макс. давление" Grid.Row="1" Grid.Column="1"/>
+                    <Label Margin="10,70,0,0" Width="160" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Среднее. давление" Grid.Row="1" Grid.Column="1"/>
+                    <Label Margin="10,130,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Мин. давление" Grid.Row="1" Grid.Column="1"/>
+                    <TextBlock 
+                        x:Name="MSMaxPressure" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,42,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding MSMaxPressure}" 
+                        VerticalAlignment="Top" 
+                        Width="160" 
+                        Height="23" Grid.Column="1" Grid.Row="1"/>
+                    <TextBlock 
+                        x:Name="MSAveragePressure" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,102,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding MSAveragePressure}" 
+                        VerticalAlignment="Top" 
+                        Width="160" 
+                        Height="23" Grid.Row="1" Grid.Column="1"/>
+                    <TextBlock 
+                        x:Name="MSMinPressure" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,162,0,0" 
+                        TextWrapping="Wrap" 
+                        Text="{Binding MSMinPressure}" 
+                        VerticalAlignment="Top" 
+                        Width="160" 
+                        Height="23" Grid.Row="1" Grid.Column="1"/>
+                    <CheckBox 
+                        IsChecked="{Binding IsBigEndian}"
+                        Content="IsBigEndian?" 
+                        HorizontalAlignment="Left" 
+                        Margin="10,427,0,0" 
+                        VerticalAlignment="Top" Grid.RowSpan="2"/>
+                    <StatusBar FontFamily="Verdana" FontSize="14" Height="28" VerticalAlignment="Bottom" Grid.Row="1" Grid.ColumnSpan="3">
                         <StatusBarItem>
                             <TextBlock Text="Статус подключения -"/>
                         </StatusBarItem>
@@ -407,42 +452,6 @@
                             <TextBlock Text="{Binding StatusText}"/>
                         </StatusBarItem>
                     </StatusBar>
-                    <Label Margin="187,320,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Макс. давление"/>
-                    <Label Margin="187,380,0,0" Width="160" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Среднее. давление"/>
-                    <Label Margin="187,440,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14" Content="Мин. давление"/>
-                    <TextBlock 
-                        x:Name="MSMaxPressure" 
-                        HorizontalAlignment="Left" 
-                        Margin="187,352,0,0" 
-                        TextWrapping="Wrap" 
-                        Text="{Binding MSMaxPressure}" 
-                        VerticalAlignment="Top" 
-                        Width="160" 
-                        Height="23"/>
-                    <TextBlock 
-                        x:Name="MSAveragePressure" 
-                        HorizontalAlignment="Left" 
-                        Margin="187,412,0,0" 
-                        TextWrapping="Wrap" 
-                        Text="{Binding MSAveragePressure}" 
-                        VerticalAlignment="Top" 
-                        Width="160" 
-                        Height="23"/>
-                    <TextBlock 
-                        x:Name="MSMinPressure" 
-                        HorizontalAlignment="Left" 
-                        Margin="187,472,0,0" 
-                        TextWrapping="Wrap" 
-                        Text="{Binding MSMinPressure}" 
-                        VerticalAlignment="Top" 
-                        Width="160" 
-                        Height="23"/>
-                    <CheckBox 
-                        IsChecked="{Binding IsBigEndian}"
-                        Content="IsBigEndian?" 
-                        HorizontalAlignment="Left" 
-                        Margin="10,427,0,0" 
-                        VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
         </TabControl>

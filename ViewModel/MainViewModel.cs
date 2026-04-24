@@ -271,9 +271,18 @@ namespace PressureEmulationWPF.ViewModel
             {
                 _selectedRegisterType = value;
                 ChangeValueTypes();
+                OnPropertyChanged("SelectedRegisterType");
             }
         }
-        public int Count { get => _count; set => _count = value; }
+        public int Count
+        {
+            get => _count;
+            set
+            {
+                _count = value;
+                OnPropertyChanged("Count");
+            }
+        }
         public ObservableCollection<string> ValueTypes { get => _valueTypes; }
         public string SelectedValueType
         {
@@ -327,7 +336,7 @@ namespace PressureEmulationWPF.ViewModel
             set
             {
                 _isBigEndian = value;
-                //OnPropertyChanged("IsBigEndian");
+                OnPropertyChanged("IsBigEndian");
             }
         }
         #endregion
@@ -714,6 +723,17 @@ namespace PressureEmulationWPF.ViewModel
                     RandomPressureMode = RandomPressureMode,
                     ConstantChangingPressureMode = ConstantChangingPressureMode,
                     ConstantPressureMode = ConstantPressureMode,
+
+                    SlaveIP = SlaveIP,
+                    SlavePort = SlavePort,
+                    SlaveID = SlaveID,
+                    InputRegisterValueAddress = InputRegisterAddress,
+                    Count = Count,
+                    IsBigEndian = IsBigEndian,
+
+                    SelectedRegisterType = SelectedRegisterType,
+                    ValueTypes = ValueTypes.ToList<string>(),
+                    SelectedValueType = SelectedValueType
                 };
                 System.Text.Json.JsonSerializer.Serialize(fs, configData);
             }
@@ -743,6 +763,21 @@ namespace PressureEmulationWPF.ViewModel
                     ConstantPressureMode = data.ConstantPressureMode;
                     ConstantChangingPressureMode = data.ConstantChangingPressureMode;
                     RandomPressureMode = data.RandomPressureMode;
+
+                    SlaveIP = data.SlaveIP;
+                    SlavePort = data.SlavePort;
+                    SlaveID = data.SlaveID;
+                    InputRegisterAddress = data.InputRegisterValueAddress;
+                    Count = data.Count;
+                    IsBigEndian = data.IsBigEndian;
+
+                    SelectedRegisterType = data.SelectedRegisterType;
+                    ValueTypes.Clear();
+                    foreach (var item in data.ValueTypes)
+                    {
+                        ValueTypes.Add(item);
+                    }
+                    SelectedValueType = data.SelectedValueType;
                 }
             }
         }
@@ -1210,9 +1245,9 @@ namespace PressureEmulationWPF.ViewModel
 
         private void CalculateMaxMinAvgPressureValues()
         {
-            MSMaxPressure = Math.Round((double)_allValuesMS.Max(x=>x.Y), 10);
-            MSAveragePressure = Math.Round((double)_allValuesMS.Average(x=>x.Y), 10);
-            MSMinPressure = Math.Round((double)_allValuesMS.Min(x=>x.Y), 10);
+            MSMaxPressure = Math.Round((double)_allValuesMS.Max(x => x.Y), 10);
+            MSAveragePressure = Math.Round((double)_allValuesMS.Average(x => x.Y), 10);
+            MSMinPressure = Math.Round((double)_allValuesMS.Min(x => x.Y), 10);
         }
 
         private void ChangeValueTypes()

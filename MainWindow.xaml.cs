@@ -33,12 +33,21 @@ namespace PressureEmulationWPF
                 e.PropertyName == nameof(MVM.EmulationDate) ||
                 e.PropertyName == nameof(MVM.ConstantPressureMode) ||
                 e.PropertyName == nameof(MVM.ConstantChangingPressureMode) ||
-                e.PropertyName == nameof(MVM.RandomPressureMode))
+                e.PropertyName == nameof(MVM.RandomPressureMode) ||
+                e.PropertyName == nameof(MVM.SlaveIP) ||
+                e.PropertyName == nameof(MVM.SlavePort) ||
+                e.PropertyName == nameof(MVM.SlaveID) ||
+                e.PropertyName == nameof(MVM.InputRegisterAddress) ||
+                e.PropertyName == nameof(MVM.Count) ||
+                e.PropertyName == nameof(MVM.IsBigEndian) ||
+                e.PropertyName == nameof(MVM.SelectedRegisterType) ||
+                e.PropertyName == nameof(MVM.ValueTypes) ||
+                e.PropertyName == nameof(MVM.SelectedValueType))
                     MVM.SaveUserInputsToJSON();
             };
         }
 
-        private void PositiveDoubleParse_Error(object sender, ValidationErrorEventArgs e)
+        private void ShowErrorMessage(object sender, ValidationErrorEventArgs e)
         {
             if (e.Action == ValidationErrorEventAction.Added)
             {
@@ -105,7 +114,8 @@ namespace PressureEmulationWPF
             var errors = Validation.GetHasError(SlaveIP) ||
                 Validation.GetHasError(SlavePort) ||
                 Validation.GetHasError(SlaveID) ||
-                Validation.GetHasError(InputRegisterAddress);
+                Validation.GetHasError(InputRegisterAddress)||
+                Validation.GetHasError(Count);
 
             if (errors)
             {
