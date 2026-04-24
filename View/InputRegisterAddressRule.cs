@@ -28,6 +28,10 @@ namespace PressureEmulationWPF.View
             // Я не уверен, что на практике может понадобиться порт с номером ноль, поэтому я добавлю его в ошибку валидации.
             if (resultValue < 0)
                 return new ValidationResult(false, $"Адрес Input регистра не может быть задан отрицательным числом!");
+            if (((resultValue) % 4) != 0)
+                return new ValidationResult(false, $"Адрес Input регистра должен быть задан числом, остаток деления которого на 4 будет равен нулю. Такими числами являются 0, 4, 8, 12 и так далее.");
+            if(resultValue > ushort.MaxValue)
+                return new ValidationResult(false, $"Адрес Input регистра не может быть больше 65 535");
             return ValidationResult.ValidResult;
         }
     }

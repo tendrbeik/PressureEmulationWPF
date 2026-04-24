@@ -374,7 +374,7 @@
                         <Binding Path="Count"
                             NotifyOnValidationError="True">
                             <Binding.ValidationRules>
-                                <rules:InputRegisterAddressRule/>
+                                <rules:CountRule/>
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
