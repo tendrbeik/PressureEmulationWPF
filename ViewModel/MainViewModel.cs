@@ -494,7 +494,7 @@ namespace PressureEmulationWPF.ViewModel
                 _ctsMS?.Cancel();
                 _ctsMS = new CancellationTokenSource();
                 //ConnectToSlave(_slaveIP, _slavePort, true);
-                _ = ModbusSlaveWatch(_ctsMS.Token, 10, 500, _slaveIP, _slavePort, _isBigEndian);
+                _ = ModbusSlaveWatch(_ctsMS.Token, 10, 500, _slaveIP, _slaveID, _slavePort, _inputRegisterAddress, _isBigEndian, _count);
             });
 
             DisconnectFromSlaveCommand = new MyCommand(_ =>
@@ -815,7 +815,7 @@ namespace PressureEmulationWPF.ViewModel
             return;
         }
 
-        private async Task ModbusSlaveWatch(CancellationToken token, int lastSecondsAmount, int delay, string slaveIP, int slavePort, bool isBigEndian)
+        private async Task ModbusSlaveWatch(CancellationToken token, int lastSecondsAmount, int delay, string slaveIP, int slaveID, int slavePort, int inputRegisterAddress, bool isBigEndian, int count)
         {
             try
             {
@@ -838,8 +838,8 @@ namespace PressureEmulationWPF.ViewModel
                 try
                 {
                     UpdateClientStatus();
-                    DrawMSChart(processTime, lastSecondsAmount, delay);
-                    ReadRegisters();
+                    DrawMSChart(processTime, lastSecondsAmount, delay, slaveID, inputRegisterAddress);
+                    ReadRegisters(slaveID, count);
                     CalculateMaxMinAvgPressureValues();
 
                     processTime += delay / 1000d;
@@ -854,9 +854,9 @@ namespace PressureEmulationWPF.ViewModel
             }
         }
 
-        private void DrawMSChart(double processTime, int lastSecondsAmount, int delay)
+        private void DrawMSChart(double processTime, int lastSecondsAmount, int delay, int slaveID, int inputRegisterAddress)
         {
-            var value = _client.ReadInputRegisters<double>(_slaveID, _inputRegisterAddress, 1);
+            var value = _client.ReadInputRegisters<double>(slaveID, inputRegisterAddress, 1);
             _lastValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
             _allValuesMS.Add(new ObservablePoint(processTime, (double)value[0]));
 
@@ -866,13 +866,13 @@ namespace PressureEmulationWPF.ViewModel
             XAxesMS[0].CustomSeparators = GetSeparatorsForSeconds(processTime, lastSecondsAmount);
         }
 
-        private void ReadRegisters()
+        private void ReadRegisters(int slaveID, int count)
         {
             switch (_selectedRegisterType)
             {
                 case "COIL STATUS":
                     {
-                        var data = _client.ReadCoils(_slaveID, 0, _count);
+                        var data = _client.ReadCoils(slaveID, 0, count);
                         _msRegisterValues.Clear();
                         string value1;
                         string value2;
@@ -899,7 +899,7 @@ namespace PressureEmulationWPF.ViewModel
                                     break;
                                 }
                         }
-                        for (int i = 0; i < _count; i++)
+                        for (int i = 0; i < count; i++)
                         {
                             int byteIndex = i / 8;
                             int bitPosition = i % 8;
@@ -912,7 +912,7 @@ namespace PressureEmulationWPF.ViewModel
                     }
                 case "INPUT STATUS":
                     {
-                        var data = _client.ReadDiscreteInputs(_slaveID, 0, _count);
+                        var data = _client.ReadDiscreteInputs(slaveID, 0, count);
                         _msRegisterValues.Clear();
                         string value1;
                         string value2;
@@ -939,7 +939,7 @@ namespace PressureEmulationWPF.ViewModel
                                     break;
                                 }
                         }
-                        for (int i = 0; i < _count; i++)
+                        for (int i = 0; i < count; i++)
                         {
                             int byteIndex = i / 8;
                             int bitPosition = i % 8;
@@ -956,9 +956,9 @@ namespace PressureEmulationWPF.ViewModel
                         {
                             case "двоичный код":
                                 {
-                                    var data = _client.ReadHoldingRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<ushort>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + i.ToString().PadLeft(5, '0');
@@ -969,9 +969,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "char":
                                 {
-                                    var data = _client.ReadHoldingRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<ushort>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + i.ToString().PadLeft(5, '0');
@@ -985,9 +985,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "short":
                                 {
-                                    var data = _client.ReadHoldingRegisters<short>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<short>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + i.ToString().PadLeft(5, '0');
@@ -998,9 +998,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "int":
                                 {
-                                    var data = _client.ReadHoldingRegisters<int>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<int>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + (i * 2).ToString().PadLeft(5, '0');
@@ -1011,9 +1011,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "long":
                                 {
-                                    var data = _client.ReadHoldingRegisters<long>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<long>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + (i * 4).ToString().PadLeft(5, '0');
@@ -1024,9 +1024,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "float":
                                 {
-                                    var data = _client.ReadHoldingRegisters<float>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<float>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + (i * 2).ToString().PadLeft(5, '0');
@@ -1037,9 +1037,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "double":
                                 {
-                                    var data = _client.ReadHoldingRegisters<double>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<double>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + (i * 4).ToString().PadLeft(5, '0');
@@ -1051,9 +1051,9 @@ namespace PressureEmulationWPF.ViewModel
                             //TODO: надо подумать над тем, что я буду выводить по умолчанию ошибку или двоичный код
                             default:
                                 {
-                                    var data = _client.ReadHoldingRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadHoldingRegisters<ushort>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "4" + i.ToString().PadLeft(5, '0');
@@ -1071,9 +1071,9 @@ namespace PressureEmulationWPF.ViewModel
                         {
                             case "двоичный код":
                                 {
-                                    var data = _client.ReadInputRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<ushort>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + i.ToString().PadLeft(5, '0');
@@ -1084,9 +1084,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "char":
                                 {
-                                    var data = _client.ReadInputRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<ushort>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + i.ToString().PadLeft(5, '0');
@@ -1100,9 +1100,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "short":
                                 {
-                                    var data = _client.ReadInputRegisters<short>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<short>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + i.ToString().PadLeft(5, '0');
@@ -1113,9 +1113,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "int":
                                 {
-                                    var data = _client.ReadInputRegisters<int>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<int>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + (i * 2).ToString().PadLeft(5, '0');
@@ -1126,9 +1126,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "long":
                                 {
-                                    var data = _client.ReadInputRegisters<long>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<long>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + (i * 4).ToString().PadLeft(5, '0');
@@ -1139,9 +1139,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "float":
                                 {
-                                    var data = _client.ReadInputRegisters<float>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<float>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + (i * 2).ToString().PadLeft(5, '0');
@@ -1152,9 +1152,9 @@ namespace PressureEmulationWPF.ViewModel
                                 }
                             case "double":
                                 {
-                                    var data = _client.ReadInputRegisters<double>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<double>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + (i * 4).ToString().PadLeft(5, '0');
@@ -1166,9 +1166,9 @@ namespace PressureEmulationWPF.ViewModel
                             //TODO: надо подумать над тем, что я буду выводить по умолчанию ошибку или двоичный код
                             default:
                                 {
-                                    var data = _client.ReadInputRegisters<ushort>(_slaveID, 0, _count).ToArray();
+                                    var data = _client.ReadInputRegisters<ushort>(slaveID, 0, count).ToArray();
                                     _msRegisterValues.Clear();
-                                    for (int i = 0; i < _count; i++)
+                                    for (int i = 0; i < count; i++)
                                     {
                                         RegisterData rd = new RegisterData();
                                         rd.Address = "3" + i.ToString().PadLeft(5, '0');
