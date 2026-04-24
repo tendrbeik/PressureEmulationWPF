@@ -7,7 +7,7 @@
         xmlns:rules="clr-namespace:PressureEmulationWPF.View"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="550" Width="800">
+        Title="MainWindow" Height="601" Width="899">
 
     <Window.Resources>
         <ControlTemplate x:Key="validationTemplate">
@@ -378,7 +378,7 @@
                             </Binding.ValidationRules>
                         </Binding>
                     </TextBox>
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="237" Width="597">
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="0,0,10,33" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="214" Width="597">
                         <DataGrid
                             ItemsSource="{Binding MSRegisterValues}"
                             SelectedItem="{Binding SelectedValueType}"
@@ -401,6 +401,14 @@
                     <Label Margin="10,310,0,0" Width="155" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="12" Content="Тип переменных"/>
                     <Label Margin="10,368,0,0" Width="147" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="10" Content="Число строк для вывода"/>
                     <Button Width="120" VerticalAlignment="Top" x:Name="MSDisconnectButton" Margin="10,455,0,0" Height="30" HorizontalAlignment="Left" Content="Отключиться" Click="MSDisconnectButton_Click"/>
+                    <StatusBar FontFamily="Verdana" FontSize="14" Height="28" VerticalAlignment="Bottom">
+                        <StatusBarItem>
+                            <TextBlock Text="Статус подключения -"/>
+                        </StatusBarItem>
+                        <StatusBarItem>
+                            <TextBlock Text="{Binding StatusText}"/>
+                        </StatusBarItem>
+                    </StatusBar>
                 </Grid>
             </TabItem>
         </TabControl>

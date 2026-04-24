@@ -9,10 +9,12 @@ using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Windows;
 using System.Windows.Input;
 
 namespace PressureEmulationWPF.ViewModel
@@ -68,6 +70,10 @@ namespace PressureEmulationWPF.ViewModel
         private ObservableCollection<string> _valueTypes = new ObservableCollection<string>() { "bool", "двоичный код" };
         private string _selectedValueType = "двоичный код";
         private ObservableCollection<RegisterData> _msRegisterValues = new ObservableCollection<RegisterData>();
+        private string _statusText;
+        private bool _isWatching = false;
+        private bool _isTimeout = false;
+        private double _countDown;
         //Описание Action<string> делегата для вывода сообщений об ошибках на форму
         private readonly Action<string> _showError;
         #endregion
@@ -275,6 +281,15 @@ namespace PressureEmulationWPF.ViewModel
             }
         }
         public ObservableCollection<RegisterData> MSRegisterValues { get => _msRegisterValues; }
+        public string StatusText
+        {
+            get => _statusText;
+            set
+            {
+                _statusText = value;
+                OnPropertyChanged("StatusText");
+            }
+        }
         #endregion
 
         public MainViewModel(Action<string> showError)
@@ -393,6 +408,9 @@ namespace PressureEmulationWPF.ViewModel
             _showError = showError;
 
             //Прописываем инициализацию свойств для вкладки ModbusSlaveTab
+            //_client.ConnectTimeout = 0;
+            UpdateClientStatus();
+
             SeriesMS = [
                 new LineSeries<ObservablePoint>
             {
@@ -435,14 +453,16 @@ namespace PressureEmulationWPF.ViewModel
             {
                 _ctsMS?.Cancel();
                 _ctsMS = new CancellationTokenSource();
-                ConnectToSlave();
-                _ = ModbusSlaveWatch(_ctsMS.Token, 10, 500);
+                //ConnectToSlave(_slaveIP, _slavePort, true);
+                _ = ModbusSlaveWatch(_ctsMS.Token, 10, 500, _slaveIP, _slavePort, true);
             });
 
             DisconnectFromSlaveCommand = new MyCommand(_ =>
             {
                 _ctsMS?.Cancel();
                 _client.Disconnect();
+                _isWatching = false;
+                UpdateClientStatus();
             });
         }
 
@@ -709,23 +729,87 @@ namespace PressureEmulationWPF.ViewModel
             return seps;
         }
 
-        private void ConnectToSlave()
+        private void ConnectToSlave(string slaveIP, int slavePort, bool isBigEndian)
         {
-            _client.Connect(new IPEndPoint(IPAddress.Parse(_slaveIP), _slavePort), ModbusEndianness.BigEndian);
+            if (isBigEndian)
+            {
+                _client.Connect(new IPEndPoint(IPAddress.Parse(slaveIP), slavePort), ModbusEndianness.BigEndian);
+            }
+            else
+            {
+                _client.Connect(new IPEndPoint(IPAddress.Parse(slaveIP), slavePort), ModbusEndianness.LittleEndian);
+            }
         }
 
-        private async Task ModbusSlaveWatch(CancellationToken token, int lastSecondsAmount, int delay)
+        private void ReconnectToSlave(string slaveIP, int slavePort, bool isBigEndian)
         {
+            while (_countDown > 0)
+            {
+                
+                try
+                {
+                    ConnectToSlave(slaveIP, slavePort, isBigEndian);
+                }
+                catch (Exception e)
+                {
+                }
+                //Проводить обновление элементов интерфейса будем через Dispatcher, чтобы работало всё плавно.
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    if (_client.IsConnected)
+                    {
+                        _countDown = 10;
+                        return;
+                    }
+                    //await Task.Delay(1000);
+
+                    UpdateClientStatus();
+                    _countDown -= _client.ConnectTimeout / 1000d;
+                });                
+            }
+
+            _isTimeout = true;
+            _isWatching = false;
+            UpdateClientStatus();
+            _ctsMS.Cancel();
+            return;
+        }
+
+        private async Task ModbusSlaveWatch(CancellationToken token, int lastSecondsAmount, int delay, string slaveIP, int slavePort, bool isBigEndian)
+        {
+            try
+            {
+                ConnectToSlave(slaveIP, slavePort, isBigEndian);
+            }
+            catch (Exception e)
+            {
+                StatusText = $"ERROR: {e.Message}";
+                return;
+            }
             _lastValuesMS.Clear();
             _allValuesMS.Clear();
             double processTime = 0;
+            _isWatching = true;
+            _isTimeout = false;
+            _countDown = 10;
 
             while (!token.IsCancellationRequested)
             {
-                DrawMSChart(processTime, lastSecondsAmount, delay);
-                ReadRegisters();
-                processTime += delay / 1000d;
-                await Task.Delay(delay);
+                try
+                {
+                    UpdateClientStatus();
+                    DrawMSChart(processTime, lastSecondsAmount, delay);
+                    ReadRegisters();
+
+                    processTime += delay / 1000d;
+                    await Task.Delay(delay);
+                }
+                catch (Exception e)
+                {
+                }
+                //Попробую вынести реконект в другой поток.
+                if (_isWatching && !_client.IsConnected)
+                    await Task.Run(() => ReconnectToSlave(slaveIP, slavePort, isBigEndian));
             }
         }
 
@@ -1057,6 +1141,24 @@ namespace PressureEmulationWPF.ViewModel
                     break;
             }
 
+        }
+
+        private void UpdateClientStatus()
+        {
+            if (_isWatching)
+            {
+                if (_client.IsConnected)
+                    StatusText = "CONNECTED.";
+                else
+                    StatusText = $"ERROR: Попытка переподключиться в течение {_countDown} сек";
+            }
+            else
+            {
+                if (!_isTimeout)
+                    StatusText = "DISCONNECTED.";
+                else
+                    StatusText = $"TIMEOUT: Попытка переподключиться не удалась.";
+            }
         }
 
         private void ChangeValueTypes()
