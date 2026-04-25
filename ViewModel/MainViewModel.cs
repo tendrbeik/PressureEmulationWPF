@@ -836,7 +836,7 @@ namespace PressureEmulationWPF.ViewModel
                 }
                 //Проводить обновление элементов интерфейса будем через Dispatcher, чтобы работало всё плавно.
                 Application.Current.Dispatcher.BeginInvoke(() =>
-                {                    
+                {
                     //await Task.Delay(1000);
 
                     UpdateClientStatus();
@@ -869,7 +869,7 @@ namespace PressureEmulationWPF.ViewModel
             _isTimeout = false;
             _countDown = 10;
             _msRegisterValues.Clear();
-            for(int i = 0; i < _count; i++)
+            for (int i = 0; i < _count; i++)
             {
                 _msRegisterValues.Add(new RegisterData());
             }
@@ -894,6 +894,13 @@ namespace PressureEmulationWPF.ViewModel
                 }
                 catch (Exception e)
                 {
+                    //Ожидаемая ошибка. Тут ничего не надо делать.
+                    if (e.InnerException is not System.Net.Sockets.SocketException ex)
+                    {  
+                        _showError(e.Message);
+                        _ctsMS.Cancel();
+                        return;
+                    }
                 }
                 //Попробую вынести реконект в другой поток.
                 if (_isWatching && !_client.IsConnected)
@@ -1063,7 +1070,7 @@ namespace PressureEmulationWPF.ViewModel
                                         //rd.Address = "4" + (i * 2).ToString().PadLeft(5, '0');
                                         //rd.RegisterValue = data[i].ToString();
                                         //_msRegisterValues.Add(rd);
-                                        _msRegisterValues[i].Address = "4" + (i*2).ToString().PadLeft(5, '0');
+                                        _msRegisterValues[i].Address = "4" + (i * 2).ToString().PadLeft(5, '0');
                                         _msRegisterValues[i].RegisterValue = data[i].ToString();
                                     }
                                     break;
