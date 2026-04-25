@@ -29,12 +29,12 @@ namespace PressureEmulationWPF.ViewModel
         private readonly Random _random = new();
         private readonly ObservableCollection<ObservablePoint> _values = new ObservableCollection<ObservablePoint>();
         private readonly ObservableCollection<ObservablePoint> _valuesForDB = new ObservableCollection<ObservablePoint>();
-        private double _upperPressureLimit = 150;
+        //private double _upperPressureLimit = 150;
         private double _constantPressureValue = 300;
         private double _startPressureValue = 300;
         private double _pressureDelta = 4;
 
-        private bool _randomPressureMode = true;
+        //private bool _randomPressureMode = true;
         private bool _constantPressureMode = false;
         private bool _constantChangingPressureMode = false;
         //Токен отмены. Нужен для того, чтобы "убить" асинхронную эмуляцию.
@@ -84,15 +84,15 @@ namespace PressureEmulationWPF.ViewModel
 
         #region Геттеры и сеттеры
         //описание геттеров и сеттеров использующихся во вкладке TabItem EmulationTab
-        public double UpperPressureLimit
-        {
-            get { return _upperPressureLimit; }
-            set
-            {
-                _upperPressureLimit = value;
-                OnPropertyChanged("UpperPressureLimit");
-            }
-        }
+        //public double UpperPressureLimit
+        //{
+        //    get { return _upperPressureLimit; }
+        //    set
+        //    {
+        //        _upperPressureLimit = value;
+        //        OnPropertyChanged("UpperPressureLimit");
+        //    }
+        //}
 
         public double ConstantPressureValue
         {
@@ -124,15 +124,15 @@ namespace PressureEmulationWPF.ViewModel
             }
         }
 
-        public bool RandomPressureMode
-        {
-            get => _randomPressureMode;
-            set
-            {
-                _randomPressureMode = value;
-                OnPropertyChanged("RandomPressureMode");
-            }
-        }
+        //public bool RandomPressureMode
+        //{
+        //    get => _randomPressureMode;
+        //    set
+        //    {
+        //        _randomPressureMode = value;
+        //        OnPropertyChanged("RandomPressureMode");
+        //    }
+        //}
 
         public bool ConstantPressureMode
         {
@@ -389,8 +389,8 @@ namespace PressureEmulationWPF.ViewModel
                 //TODO: потенциальная уязвимость. Надо подумать может ли где-то быть прыдыдущий токен.
                 //_cts?.Cancel();
                 _cts = new CancellationTokenSource();
-                if (RandomPressureMode)
-                    _ = RandomPressureEmulation(_cts.Token, _upperPressureLimit, 10, 1000);
+                //if (RandomPressureMode)
+                //    _ = RandomPressureEmulation(_cts.Token, _upperPressureLimit, 10, 1000);
                 if (ConstantPressureMode)
                     _ = ConstantPressureEmulation(_cts.Token, _constantPressureValue, 10, 1000);
                 if (ConstantChangingPressureMode)
@@ -714,13 +714,13 @@ namespace PressureEmulationWPF.ViewModel
             {
                 var configData = new ConfigData()
                 {
-                    UpperPressureLimit = UpperPressureLimit,
+                    //UpperPressureLimit = UpperPressureLimit,
                     ConstantPressureValue = ConstantPressureValue,
                     PressureDelta = PressureDelta,
                     StartPressureValue = StartPressureValue,
                     EmulationName = EmulationName,
                     EmulationDateTime = EmulationDate,
-                    RandomPressureMode = RandomPressureMode,
+                    //RandomPressureMode = RandomPressureMode,
                     ConstantChangingPressureMode = ConstantChangingPressureMode,
                     ConstantPressureMode = ConstantPressureMode,
 
@@ -754,7 +754,7 @@ namespace PressureEmulationWPF.ViewModel
                 }
                 if (data != null)
                 {
-                    UpperPressureLimit = data.UpperPressureLimit;
+                    //UpperPressureLimit = data.UpperPressureLimit;
                     ConstantPressureValue = data.ConstantPressureValue;
                     PressureDelta = data.PressureDelta;
                     StartPressureValue = data.StartPressureValue;
@@ -762,7 +762,7 @@ namespace PressureEmulationWPF.ViewModel
                     EmulationDate = data.EmulationDateTime;
                     ConstantPressureMode = data.ConstantPressureMode;
                     ConstantChangingPressureMode = data.ConstantChangingPressureMode;
-                    RandomPressureMode = data.RandomPressureMode;
+                    //RandomPressureMode = data.RandomPressureMode;
 
                     SlaveIP = data.SlaveIP;
                     SlavePort = data.SlavePort;

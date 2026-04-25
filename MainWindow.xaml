@@ -44,7 +44,7 @@
                         x:Name="StartButton" 
                         Content="Старт" 
                         HorizontalAlignment="Left" 
-                        Margin="10,287,0,0" 
+                        Margin="10,220,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" Width="120"
                         Click="StartButton_Click"/>
@@ -52,49 +52,20 @@
                         x:Name="StopButton" 
                         Content="Стоп" 
                         HorizontalAlignment="Left" 
-                        Margin="10,322,0,0" 
+                        Margin="10,255,0,0" 
                         VerticalAlignment="Top" 
                         Height="30" 
                         Width="120"
                         Command="{Binding StopCommand}"/>
-                    <TextBox
-                        x:Name="UpperPressureLimit" 
-                        HorizontalAlignment="Left" 
-                        Margin="10,56,0,0" 
-                        VerticalAlignment="Top" 
-                        Width="120" 
-                        FontFamily="Verdana" 
-                        FontSize="14" 
-                        Validation.ErrorTemplate="{StaticResource validationTemplate}"
-                        Validation.Error="ShowErrorMessage"
-                        AutomationProperties.HelpText="Верхний предел давления задаётся числом с плавающей точкой. Пример - &quot;19.3&quot;." Height="20">
-                        <TextBox.Text>
-                            <Binding Path="UpperPressureLimit" 
-                                     NotifyOnValidationError="True">
-                                <Binding.ValidationRules>
-                                    <rules:PositiveDoubleValueRule/>
-                                </Binding.ValidationRules>
-                            </Binding>
-                        </TextBox.Text>
-                    </TextBox>
                     <RadioButton 
                         x:Name="ConstantPressureMode" 
                         Content="Постоянное давление" 
                         HorizontalAlignment="Left" 
-                        Margin="10,81,0,0" 
+                        Margin="10,14,0,0" 
                         VerticalAlignment="Top" 
                         FontSize="12" 
                         GroupName="PressureMode"
                         IsChecked="{Binding ConstantPressureMode}"/>
-                    <RadioButton 
-                        x:Name="RandomPressureMode" 
-                        Content="Случайное давление" 
-                        HorizontalAlignment="Left"
-                        Margin="10,10,0,0" 
-                        VerticalAlignment="Top" 
-                        FontSize="12" 
-                        GroupName="PressureMode" 
-                        IsChecked="{Binding RandomPressureMode}"/>
                     <lvc:CartesianChart
                         Series="{Binding Series}"
                         XAxes="{Binding XAxes}"
@@ -103,11 +74,10 @@
                         Margin="185,10,10,10" 
                         Background="White" 
                         BorderBrush="Black" Grid.ColumnSpan="4"/>
-                    <Label Content="Верхний предел давления" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
                     <TextBox 
                         x:Name="ConstantPressureValue" 
                         HorizontalAlignment="Left" 
-                        Margin="10,134,0,0" 
+                        Margin="10,67,0,0" 
                         TextWrapping="Wrap"
                         VerticalAlignment="Top" 
                         Width="120"
@@ -125,7 +95,7 @@
                     <TextBox 
                         x:Name="PressureDelta" 
                         HorizontalAlignment="Left" 
-                        Margin="10,262,0,0" 
+                        Margin="10,195,0,0" 
                         TextWrapping="Wrap"
                         VerticalAlignment="Top" 
                         Width="120"
@@ -140,13 +110,13 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <Label Content="Шаг изменения давления" HorizontalAlignment="Left" Margin="10,235,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="10,100,0,0" TextWrapping="Wrap" Text="Величина постоянного давления" VerticalAlignment="Top" Height="29" Width="128" FontSize="10"/>
+                    <Label Content="Шаг изменения давления" HorizontalAlignment="Left" Margin="10,168,0,0" VerticalAlignment="Top" Width="155" FontSize="10"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,33,0,0" TextWrapping="Wrap" Text="Величина постоянного давления" VerticalAlignment="Top" Height="29" Width="128" FontSize="10"/>
                     <RadioButton 
                         x:Name="ConstantChangingPressureMode" 
                         Content="Раст./Убыв. давление" 
                         HorizontalAlignment="Left" 
-                        Margin="10,159,0,0" 
+                        Margin="10,92,0,0" 
                         VerticalAlignment="Top" 
                         FontSize="12" 
                         GroupName="PressureMode"
@@ -154,7 +124,7 @@
                     <TextBox 
                         x:Name="StartPressureValue" 
                         HorizontalAlignment="Left" 
-                        Margin="10,210,0,0" 
+                        Margin="10,143,0,0" 
                         TextWrapping="Wrap" 
                         VerticalAlignment="Top" 
                         Width="120"    
@@ -169,7 +139,7 @@
                             </Binding>
                         </TextBox.Text>
                     </TextBox>
-                    <Label Content="Стартовое значение давления" HorizontalAlignment="Left" Margin="10,183,0,0" VerticalAlignment="Top" Width="170" FontSize="10"/>
+                    <Label Content="Стартовое значение давления" HorizontalAlignment="Left" Margin="10,116,0,0" VerticalAlignment="Top" Width="170" FontSize="10"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="SaveLastEmulationTab" Header="Сохранить последнюю эмуляцию" FontFamily="Verdana" FontSize="14">

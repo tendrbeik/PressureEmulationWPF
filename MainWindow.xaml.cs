@@ -25,7 +25,8 @@ namespace PressureEmulationWPF
             DataContext = MVM;
             MVM.PropertyChanged += (sender, e) =>
             {
-                if (e.PropertyName == nameof(MVM.UpperPressureLimit) ||
+                if (
+                //e.PropertyName == nameof(MVM.UpperPressureLimit) ||
                 e.PropertyName == nameof(MVM.ConstantPressureValue) ||
                 e.PropertyName == nameof(MVM.PressureDelta) ||
                 e.PropertyName == nameof(MVM.StartPressureValue) ||
@@ -33,7 +34,7 @@ namespace PressureEmulationWPF
                 e.PropertyName == nameof(MVM.EmulationDate) ||
                 e.PropertyName == nameof(MVM.ConstantPressureMode) ||
                 e.PropertyName == nameof(MVM.ConstantChangingPressureMode) ||
-                e.PropertyName == nameof(MVM.RandomPressureMode) ||
+                //e.PropertyName == nameof(MVM.RandomPressureMode) ||
                 e.PropertyName == nameof(MVM.SlaveIP) ||
                 e.PropertyName == nameof(MVM.SlavePort) ||
                 e.PropertyName == nameof(MVM.SlaveID) ||
@@ -76,14 +77,14 @@ namespace PressureEmulationWPF
         {
             try
             {
-                bool RPM = (bool)RandomPressureMode.IsChecked;
+                //bool RPM = (bool)RandomPressureMode.IsChecked;
                 bool CPM = (bool)ConstantPressureMode.IsChecked;
                 bool CCPM = (bool)ConstantChangingPressureMode.IsChecked;
-                if (RPM && Validation.GetHasError(UpperPressureLimit))
-                {
-                    MessageBox.Show("Исправьте ошибку в поле ввода верхнего предела давления, чтобы запустить эмуляцию случайного давления.");
-                    return;
-                }
+                //if (RPM && Validation.GetHasError(UpperPressureLimit))
+                //{
+                //    MessageBox.Show("Исправьте ошибку в поле ввода верхнего предела давления, чтобы запустить эмуляцию случайного давления.");
+                //    return;
+                //}
                 if (CPM && Validation.GetHasError(ConstantPressureValue))
                 {
                     MessageBox.Show("Исправьте ошибку в поле ввода постоянного значения давления, чтобы запустить эмуляцию постоянного давления.");
