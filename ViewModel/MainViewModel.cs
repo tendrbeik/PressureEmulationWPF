@@ -829,14 +829,14 @@ namespace PressureEmulationWPF.ViewModel
                 catch (Exception e)
                 {
                 }
+                if (_client.IsConnected)
+                {
+                    _countDown = 10;
+                    return;
+                }
                 //Проводить обновление элементов интерфейса будем через Dispatcher, чтобы работало всё плавно.
                 Application.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    if (_client.IsConnected)
-                    {
-                        _countDown = 10;
-                        return;
-                    }
+                {                    
                     //await Task.Delay(1000);
 
                     UpdateClientStatus();
